@@ -24,7 +24,7 @@ Flutter flutter;
 byte mydata = 0;
 
 
-//#define TRANSMITTER
+#define TRANSMITTER
 
 
 void setup() {
