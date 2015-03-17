@@ -1,0 +1,169 @@
+
+NOTE: This list of notes is very rough and incomplete.
+
+
+Mon Feb 9th code change notes:
+adding in TX buffer and TX transmit capability.
+Added in scheduling capability
+Added the ability to queue TX packets
+
+
+
+status flags
+=============
+
+enabled
+awake
+synchronized
+orphan
+orphanwait
+{
+	orphanwaitbegin
+}
+syncwait
+
+
+system descriptors
+
+Network Seed:
+Generates random channel list of 50 channels.
+Timing channel is channel 0 of list.
+
+Pairing channel:
+Can be channel 51 of generated list, or set manually.
+
+
+
+Internal values (hard coded for now):
+
+Hop Frame Length:
+time in ms between hops
+
+Data Frame Length: Time in ms for data frames.
+
+Hop guard time: time in ms to avoid using the radio before and after hops.
+
+Contention time:
+
+
+Packet Data Format
+========
+  packet[0] = length-1; //packet length byte not included in length calculation
+  packet[1] = destaddress;
+  packet[2] = address;
+  packet[3] = command;
+  packet[4] = network code;
+
+
+Command codes:
+
+0x20 - user data, byte array
+0x21 - user data, string
+0x22 - user data, 32 bit float
+0x23 - user data, 64 bit double
+0x24 - user data, 32 bit unsigned int
+0x25 - user data, 32 bit signed int
+0x26 - user data, 64 bit unsigned int
+0x27 - user data, 64 bit signed int
+0x28 - user data, two 32 bit signed ints
+0x29 -
+0x2A -
+0x2B -
+0x2C -
+0x2D -
+0x2E -
+0x2F -
+
+0x30 - 
+0x31 - 
+0x32 - 
+0x33 - 
+0x34 - 
+0x35 - 
+0x36 - 
+0x37 - 
+0x38 - 
+0x39 -
+0x3A -
+0x3B -
+0x3C -
+0x3D -
+0x3E -
+0x3F -
+
+0x40 - system control, orphan host request
+0x41 - system control, orphan request response. Contains timing and channel information or orphan-orphan response.
+0x42 - system control, network descriptor packet - timing and channel information
+0x43 - system control, request for host. If no host is known, one will be elected. Default choice is first to send request for host.
+0x44 - 
+0x45 - 
+0x46 - 
+0x47 - 
+0x48 - 
+0x49 -
+0x4A -
+0x4B -
+0x4C -
+0x4D -
+0x4E -
+0x4F -
+
+
+File Structure:
+=========
+Network Class:
+Deals with all high level networking tasks. Holds state information for network status.
+
+Radio Class:
+Abstract radio definition. Network class performs all actons on radio object.
+
+CC1200 Class:
+Chip-specific driver for Radio class to work with.
+
+
+
+Code notes
+=========
+
+radio.enabled
+radio.awake
+radio.synchronized
+
+radioWake()
+{
+	if(!enabled)
+	{
+	cc1200Enable()
+	}
+	if(!enabled)
+	{
+	return false;
+	}
+	radio.awake=true.
+	syncRadio();
+}
+
+cc1200Enable()
+{
+	//brings CC1200 to operational status with our settings.
+
+
+	enabled=true;
+}
+
+
+
+timerTick() //every 1ms
+{
+	if(radio.awake)
+	{
+		if(radio.synchronized)
+		{
+			//normal operation
+
+		} else
+		{
+			if(radio.timingsync)
+		}
+	}
+}
