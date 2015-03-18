@@ -155,7 +155,7 @@ class Network
 
     void pinDebug(int pin, int value);
 
- 
+  
 
     byte queuedTXCommands;
     byte commandQueueTX[COMMAND_QUEUE_SIZE][3];
@@ -191,6 +191,8 @@ class Network
     void queueCommand(byte cmd, byte start, byte length);
     
     void requestHost(uint16_t devices);
+
+    void syncTime(byte packetLength);
 
     void txNext();
     void transmitPacket(int index);

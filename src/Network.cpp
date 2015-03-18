@@ -392,7 +392,7 @@ void Network::processNormalOperation()
 
     if(channelIndex == TIMING_CH_INDEX && address == MASTER_ADDRESS)
     {
-     // transmitSyncPacket(0x00);
+      transmitSyncPacket(0x00);
     }
 
     if(channelIndex!= TIMING_CH_INDEX)// && time.micros%HOPTIME <=45000)
@@ -485,6 +485,151 @@ byte Network::queueRXPacket(byte packetLength)
 
 	return 0;
 }
+
+
+void Network::syncTime(byte packetLength)
+{
+ // byte txData[6] = { (byte)((micros()%1000)/4),(byte)(((time.millis%1000)>>2) & 0xFF) ,(byte)((time.millis%1000<<6) & 0xC0) | (time.seconds>>24 & 0x3F) ,(byte)(time.seconds>>16 & 0xFF) ,(byte)(time.seconds>>8 & 0xFF) ,(byte)(time.seconds & 0xFF)};
+/*
+
+  timeType temp;
+  synchronized=true;
+
+  int16_t sentMicros = ((int16_t)packetBuffer[index][5])*4;
+  int32_t sentMillis = ((int32_t)packetBuffer[index][6])<<2 | ((int32_t)(packetBuffer[index][7])>>6);
+  int32_t sentSeconds = ((int32_t)(packetBuffer[index][7]) & 0x3F)<<24 | ((int32_t)packetBuffer[index][8])<<16 | ((int32_t)packetBuffer[index][9])<<8 | packetBuffer[index][10];
+
+  int32_t localMicrosWhenReceived = ((int32_t)packetBuffer[index][PKTLENGTH+1])*4;
+  int32_t localMillisWhenReceived = ((int32_t)packetBuffer[index][PKTLENGTH+2])<<2 | ((int32_t)(packetBuffer[index][PKTLENGTH+3])>>6);
+  int32_t localSecondsWhenReceived = ((int32_t)(packetBuffer[index][PKTLENGTH+3]) & 0x3F)<<24 | ((int32_t)packetBuffer[index][PKTLENGTH+4])<<16 | ((int32_t)packetBuffer[index][PKTLENGTH+5])<<8 | (int32_t) packetBuffer[index][PKTLENGTH+6];
+
+  int32_t microsNow = micros()%1000;
+  int32_t millisNow = time.millis; 
+
+  int32_t microsElapsed = micros()%1000-localMicrosWhenReceived;
+  int32_t millisElapsed = time.millis-localMillisWhenReceived;
+  int32_t secondsElapsed = time.seconds-localSecondsWhenReceived;
+
+  //pinDebug(9,LOW);
+
+  if(microsElapsed<0)
+  {
+    microsElapsed+=1000;
+    millisElapsed-=1;
+  }
+  if(millisElapsed<0)
+  {
+    millisElapsed+=1000;
+    secondsElapsed-=1;
+  }
+
+
+// time now = time sent + time elapsed
+  
+ // uint16_t error = micros()%1000 - (tempMicros+microsSinceReception);
+
+  int32_t newMicros = sentMicros+microsElapsed+TIMING_ADJUST; //7900;//+44400;
+  int32_t newMillis = sentMillis+millisElapsed;
+  int32_t newSeconds = sentSeconds+secondsElapsed;
+
+
+  while(newMicros>=1000)
+  {
+    newMicros-=1000;
+    newMillis++;
+  }
+  while(newMicros<0)
+  {
+    newMicros+=1000;
+    newMillis--;
+  }
+
+  while(newMillis>=1000)
+  {
+    newMillis-=1000;
+    newSeconds++;
+  }
+  while(newMillis<0)
+  {
+    newMillis+=1000;
+    newSeconds--;
+  }
+
+  setMicros(1000-newMicros);
+  time.millis = newMillis;
+  time.seconds = newSeconds;
+
+  #ifdef DEBUG_TIME
+  Serial.print("Local time when recieved: ");
+  Serial.print((localMicrosWhenReceived));
+  Serial.print(" uS, ");
+  Serial.print((localMillisWhenReceived));
+  Serial.print(" mS, ");
+  Serial.print((localSecondsWhenReceived));
+  Serial.println(" S.");
+  Serial.print("Time recieved over the air: ");
+  Serial.print((sentMicros));
+  Serial.print(" uS, ");
+  Serial.print((sentMillis));
+  Serial.print(" mS, ");
+  Serial.print((sentSeconds));
+  Serial.println(" S.");
+  Serial.print("Time elapsed: ");
+  Serial.print((microsElapsed));
+  Serial.print(" uS, ");
+  Serial.print((millisElapsed));
+  Serial.print(" mS, ");
+  Serial.print((secondsElapsed));
+  Serial.println(" S.");
+  Serial.print("Time now: ");
+  Serial.print((microsNow));
+  Serial.print(" uS, ");
+  Serial.print((millisNow));
+  Serial.println(" mS, ");
+  Serial.print("Setting to: ");
+  Serial.print((newMicros));
+  Serial.print(" uS, ");
+  Serial.print((newMillis));
+  Serial.println(" mS, ");
+  Serial.println("");
+  #endif
+  
+
+
+
+ // Serial.print("Time Error: ");
+ // Serial.println((error)/1000);
+  //Serial.print("Read Packet Lag: ");
+  //Serial.println((microsSinceReception)/1000);
+  //Serial.print("Packet Index: ");
+  //Serial.println(index);
+//  Serial.println();
+
+
+  //Serial.print("RX Error: ");
+ // Serial.println((temp.micros-microsRecieved/1000)/1000.0f);
+
+
+
+
+  if(_controlLED)
+  {
+  setLED(0,0,0);
+  }
+
+//channel = 0;
+
+  #ifdef DEBUG
+  Serial.print("Time: ");
+  Serial.print(time.seconds+(time.millis)/1000.0f);
+  Serial.println(" seconds.");
+  #endif
+ // Serial.print(time.micros/1000);
+ // Serial.println("ms.");
+ */
+}
+
+
 
 //user data functions
 int Network::dataAvailable()
