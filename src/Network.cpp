@@ -392,7 +392,7 @@ void Network::processNormalOperation()
 
     if(channelIndex == TIMING_CH_INDEX && address == MASTER_ADDRESS)
     {
-      transmitSyncPacket(0x00);
+      //transmitSyncPacket(0x00);
     }
 
     if(channelIndex!= TIMING_CH_INDEX)// && time.micros%HOPTIME <=45000)
