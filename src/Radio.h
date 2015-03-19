@@ -48,6 +48,7 @@ class Radio
   	boolean enable();
     boolean transmit(byte *data, byte start, byte length);
     boolean transmit(byte *data, byte length);
+    void clearRXFIFO();
 
   private:
 

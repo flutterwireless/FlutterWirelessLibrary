@@ -22,6 +22,7 @@
 
 #include "CC1200.h"
 
+
 //#include <SPI.h>
 #include <math.h>
 
@@ -930,6 +931,15 @@ byte CC1200::bytesAvailable()
 
 }
 
+void CC1200::clearRXFIFO()
+{
+  setState(RADIO_IDLE);
+  SendStrobe(SFRX);
+  setState(RADIO_RX);
+  #ifdef DEBUG
+  Serial.println("PACKET ERROR, CLEARED RX FIFO");
+  #endif
+}
 
 boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 {
@@ -942,11 +952,11 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
   if( rxBuffer.bytesAvailable() < bytesToRead)
   {
     #ifdef DEBUG
-    Serial.println("QUEUE FULL");
-    setState(RADIO_IDLE);
-    SendStrobe(SFRX);
-    setState(RADIO_RX);
+    Serial.print("QUEUE CAPACITY INSUFFICIENT. PACKET OF LENGTH ");
+    Serial.print(bytesToRead);
+    Serial.println(" BYTES WILL NOT FIT IN QUEUE.");
     #endif
+    clearRXFIFO();
     return false;
   }
 
@@ -955,7 +965,9 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 
                 // Mask out MARCSTATE bits and check if we have a RX FIFO error
             if((marcState & 0x1F) == RX_FIFO_ERROR) {
+            #ifdef DEBUG
             Serial.println("RX FIFO ERR");
+            #endif
               // Flush RX FIFO
             setState(RADIO_IDLE);
             SendStrobe(SFRX);
@@ -977,15 +989,15 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
                  rxBuffer.end = rxBuffer.end+bytesToRead;
 
               }else{
+                #ifdef DEBUG
                 Serial.println("CRC BAD");
-                  setState(RADIO_IDLE);
-                  SendStrobe(SFRX);
-                  setState(RADIO_RX);
+                #endif
+                 clearRXFIFO();
               }
            }
 
     #ifdef DEBUG
-    if(dataGood|true)
+    if(dataGood)
     {
     Serial.print("RX buffer contains ");
     Serial.print(bytesToRead);

@@ -256,7 +256,7 @@ boolean Network::softInt() //software interrupt
     #ifdef DEBUG1
     Serial.println("Read RX"); 
     #endif
-    byte packetLength=readPacket();
+    int packetLength=readPacket();
     if(packetLength>0)
     {
       #ifdef DEBUG1
@@ -343,7 +343,7 @@ void Network::dequeueTXBytes(int index)
 
 void Network::dequeueRXPacket(int index)
 {
-  if(index==0)
+  if(index==0 && queuedRXPackets!=0)
   {
     int length = packetQueueRX[index][2];
     int i=0;
@@ -357,6 +357,7 @@ void Network::dequeueRXPacket(int index)
       packetQueueRX[i][1]=packetQueueRX[i+1][1]-length;
       packetQueueRX[i][2]=packetQueueRX[i+1][2];
     }
+    
     queuedRXPackets--;
   }
 
@@ -417,11 +418,23 @@ int Network::readPacket()
 {
   byte count = radio.bytesAvailable();
 
+  #ifdef DEBUG
+  Serial.println("");
+  Serial.println("----------------");
+  Serial.println("");
+  #endif
+
  //  Serial.print("Count: "); 
  //  Serial.print(count); 
 
   if(count>0)
   {
+    if(count==0xFF) //The radio only has a 1280 byte FIFO, so 255 represents a FIFO error (typically due to a bit flip in the length byte of the packet)
+    {
+      radio.clearRXFIFO();
+      return -1;
+    }
+
     if(radio.readRX(rxBuffer,count))
     {
       return count;
@@ -442,8 +455,10 @@ byte Network::processRXPacket(byte packetLength)
 
   int command = rxBuffer.array[commandByteIndex];
 
+  #ifdef DEBUG
   Serial.print("Command Byte. 0x");
   Serial.println(command, HEX);
+  #endif
 
   switch(command)
   {
@@ -655,11 +670,6 @@ int Network::readBytes(byte *array, int packetSize)
   {
     array[i]=rxBuffer.array[i];
   }
-Serial.println("");
-  Serial.println("----------------");
-  Serial.println("");
-
-
 
   return packetSize;
 }
@@ -932,6 +942,7 @@ void Network::queueCommand(byte cmd, byte start, byte length)
     commandQueueTX[queuedTXCommands][1]=start;
     commandQueueTX[queuedTXCommands][2]=length;
     queuedTXCommands++;
+    #ifdef DEBUG
     Serial.print("Queuing Command "); 
       Serial.print(queuedTXCommands, DEC); 
       Serial.print(" = ");
@@ -940,6 +951,7 @@ void Network::queueCommand(byte cmd, byte start, byte length)
       Serial.print(start, DEC); 
       Serial.print(" ");
       Serial.println(length, DEC); 
+      #endif
       
     }else
     {

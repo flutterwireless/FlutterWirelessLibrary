@@ -66,3 +66,8 @@ void Radio::setAddress(byte address)
 {
   ccradio.setAddress(address);
 }
+
+void Radio::clearRXFIFO()
+{
+	ccradio.clearRXFIFO();
+}

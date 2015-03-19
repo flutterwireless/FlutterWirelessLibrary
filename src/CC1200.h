@@ -105,6 +105,8 @@ class CC1200
 
   byte printMARC();
 
+  void clearRXFIFO();
+
   private:
   
   

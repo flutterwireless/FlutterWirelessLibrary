@@ -153,9 +153,6 @@ int Flutter::packetRSSI(byte *array,int packetSize)
 
 int val = array[packetSize-2];
 
-Serial.print("Val = 0x");
-Serial.println(val,HEX);
-
   int dbm = 0;
 
   if(val>=128)

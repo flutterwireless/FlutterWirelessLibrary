@@ -103,19 +103,20 @@ void loop() {
 
     flutter.readBytes(array,packetSize);
 
-    Serial.print("Packet Size: ");
-    Serial.println(packetSize);
-    for(int i=0;i<packetSize;i++)
-    {
-      Serial.print("[0x");
-      Serial.print(array[i], HEX);
-      Serial.print("]");
-    }
-
-    Serial.println();
-
     if(array[5]==0x63)
     {
+
+      Serial.print("Packet Size: ");
+      Serial.println(packetSize);
+      for(int i=0;i<packetSize;i++)
+      {
+        Serial.print("[0x");
+        Serial.print(array[i], HEX);
+        Serial.print("]");
+      }
+
+      Serial.println();
+
 
       mydata = array[6];
 
@@ -141,6 +142,7 @@ void loop() {
 
 
         }
+
     }
     
 
