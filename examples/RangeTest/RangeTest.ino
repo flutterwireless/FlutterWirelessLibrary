@@ -23,7 +23,7 @@ Flutter flutter;
 
 byte mydata = 0;
 
-
+// To test this program, flash one board as a transmitter and then comment out this line (with //) to flash another board as a receiver
 #define TRANSMITTER
 
 
@@ -125,6 +125,13 @@ void loop() {
       Serial.print("RSSI: ");
       Serial.print(rssi);
       Serial.println(" dBm");
+
+      for(int j=0;j>rssi;j--)
+      {
+        Serial.print("=");
+      }
+
+      Serial.println("");
 
         switch(mydata%3)
         {

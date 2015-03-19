@@ -93,10 +93,9 @@
 #define INVALID     ((1<<0)|(1<<1)|(1<<2)) // 7
 
 
-
-
 typedef struct
 {
+int16_t micros;
 int16_t millis;
 int32_t seconds;
 } timeType;
@@ -115,8 +114,10 @@ class Network
   	String networkName;
   	byte networkStatus;
   	volatile timeType time;
+    volatile timeType lastPacketTime;
     volatile int radioState;
     volatile boolean rxPending;
+    boolean synchronized;
 
    // byte txBuffer[BUFFER_SIZE];
    // byte rxBuffer[BUFFER_SIZE];
@@ -156,7 +157,7 @@ class Network
 
     void pinDebug(int pin, int value);
 
-  
+    
 
     byte queuedTXCommands;
     byte commandQueueTX[COMMAND_QUEUE_SIZE][3];
@@ -193,6 +194,7 @@ class Network
     
     void requestHost(uint16_t devices);
 
+    void updateLastPacketTime();
     void syncTime(byte packetLength);
 
     void txNext();

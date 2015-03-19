@@ -70,7 +70,7 @@
 
 #define DEBUG
 //#define RADIOTESTMODE
-//#define PIN_DEBUG
+#define PIN_DEBUG
 
 
 class Flutter
