@@ -143,6 +143,7 @@ class Network
 
     Queue::Queue rxBuffer;
     Queue::Queue txBuffer;
+    Queue::Queue userBuffer;
 
     int dataAvailable();
     int nextPacket();

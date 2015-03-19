@@ -256,7 +256,9 @@ boolean Network::softInt() //software interrupt
     #ifdef DEBUG1
     Serial.println("Read RX"); 
     #endif
+    
     int packetLength=readPacket();
+
     if(packetLength>0)
     {
       #ifdef DEBUG1
@@ -264,7 +266,9 @@ boolean Network::softInt() //software interrupt
       Serial.print(packetLength); 
       Serial.print(" bytes from radio."); 
       #endif
-      processRXPacket(packetLength);
+
+    processRXPacket(packetLength);
+
     }else if(packetLength<0)
     {
       queuedRXPackets=0;
@@ -349,7 +353,7 @@ void Network::dequeueRXPacket(int index)
     int i=0;
     for(i=0;i<packetQueueRX[index][2];i++)
     {
-      rxBuffer.read();
+      userBuffer.read();
     }
 
     for(i=0;i<queuedRXPackets-1;i++)
@@ -357,7 +361,7 @@ void Network::dequeueRXPacket(int index)
       packetQueueRX[i][1]=packetQueueRX[i+1][1]-length;
       packetQueueRX[i][2]=packetQueueRX[i+1][2];
     }
-    
+
     queuedRXPackets--;
   }
 
@@ -478,10 +482,19 @@ byte Network::processRXPacket(byte packetLength)
 byte Network::queueRXPacket(byte packetLength)
 {
 
+  int i = rxBuffer.bytesEnd()-packetLength; //start at the beginning of the packet
+  while(i<rxBuffer.bytesEnd()) //read to the end of the packet
+  {
+    userBuffer.write(rxBuffer.array[i]); //copy values into the user buffer
+    i++;
+  }
+  rxBuffer.end-=packetLength; // shift rxBuffer queue end pointer to before our now-copied packet
+
   packetQueueRX[queuedRXPackets][0]=RX_PACKET;
-  packetQueueRX[queuedRXPackets][1]=rxBuffer.bytesEnd()-packetLength;
+  packetQueueRX[queuedRXPackets][1]=userBuffer.bytesEnd()-packetLength;
   packetQueueRX[queuedRXPackets][2]=packetLength;
-  
+
+
 
   #ifdef DEBUG
   Serial.print("Received Packet, Index #");
@@ -492,10 +505,10 @@ byte Network::queueRXPacket(byte packetLength)
 
   queuedRXPackets++;
 
-  if(rxBuffer.bytesEnd()>100 || queuedRXPackets == RX_PACKET_QUEUE_SIZE)
+  if(userBuffer.bytesEnd()>100 || queuedRXPackets == RX_PACKET_QUEUE_SIZE)
   {
     queuedRXPackets=0;
-    rxBuffer.clear();
+    userBuffer.clear();
   }
 
 	return 0;
@@ -649,7 +662,7 @@ void Network::syncTime(byte packetLength)
 //user data functions
 int Network::dataAvailable()
 {
-  return rxBuffer.bytesEnd();
+  return userBuffer.bytesEnd();
 }
 
 int Network::nextPacketLength()
@@ -668,7 +681,7 @@ int Network::readBytes(byte *array, int packetSize)
   int i;
   for(i=0;i<packetSize;i++)
   {
-    array[i]=rxBuffer.array[i];
+    array[i]=userBuffer.array[i];
   }
 
   return packetSize;
