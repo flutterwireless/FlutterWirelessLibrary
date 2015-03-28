@@ -81,34 +81,36 @@ class Flutter
         boolean synchronized;
         
 
+	    boolean init();
+        void setLED(int red, int green, int blue);
+    	byte sendData(byte data, byte address);
+    	byte sendData(byte data[], byte length, byte address);
+    	byte next();
+    	void connect(uint16_t devices);
 
-    boolean init();
-    void setLED(int red, int green, int blue);
-    byte sendData(byte data, byte address);
-    byte sendData(byte data[], byte length, byte address);
-    byte next();
-    void connect(uint16_t devices);
+        void setNetworkName(String name);
+        void setAddress(int address);
 
+        int interrupt();
+        boolean processSoftInt();
+        boolean tickInt();
 
-    void setNetworkName(String name);
-    void setAddress(int address);
+        void ledLightShow();
 
-    int interrupt();
-    boolean processSoftInt();
-    boolean tickInt();
-
-    void ledLightShow();
+        int getState();
+        int dataAvailable();
+        int nextPacket();
+        int nextPacketLength();
+        int readBytes(byte *array,int packetSize);
 
         int packetRSSI(byte *array,int packetSize);
         void pause();
         void resume();
 
-    int packetRSSI(byte *array,int packetSize);
-
-private:
-    void setRadioPins();
-    void setFlutterPins();
-    void setInterrupts();
+    private:
+        void setRadioPins();
+        void setFlutterPins();
+        void setInterrupts();
 };
 
 
