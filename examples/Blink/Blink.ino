@@ -71,7 +71,7 @@ void loop() {
 	
 
 	//read the radio to see if there is data available
-	while(flutter.dataAvailable>0)
+	while(flutter.dataAvailable()>0)
 	{
 		byte data = flutter.next();
 		if(data%2==1) //if our data is an odd number

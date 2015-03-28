@@ -40,7 +40,6 @@
 //Use one of the values
 #define BAND REPLACE_THIS_TEXT_WITH_YOUR_REGION_FROM_ABOVE
 
-
 #define FREQ_BANDS {865000000,902000000,915000000,925000000} //hz
 #define NUM_CHANNELS {60,520,260,60} //hz
 #define NUM_BANDS 4
@@ -95,9 +94,9 @@
 
 typedef struct
 {
-int_fast16_t micros;
-int_fast16_t millis;
-int_fast32_t seconds;
+int16_t micros;
+int16_t millis;
+int32_t seconds;
 } timeType;
 
 
@@ -118,7 +117,6 @@ class Network
     volatile int radioState;
     volatile boolean rxPending;
     boolean synchronized;
-    boolean paused;
 
    // byte txBuffer[BUFFER_SIZE];
    // byte rxBuffer[BUFFER_SIZE];

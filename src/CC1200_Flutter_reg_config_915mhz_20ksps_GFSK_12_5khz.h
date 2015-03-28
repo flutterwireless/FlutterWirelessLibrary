@@ -36,11 +36,12 @@
 
 typedef struct
 {
-int addr;
-byte data;
+    int addr;
+    byte data;
 } registerSettings;
 
-static const registerSettings settings[] = {
+static const registerSettings settings[] =
+{
     {REG_RFEND_CFG1,        (0x3<<4)|(0x7<<1)}, //auto RX
     {REG_RFEND_CFG0,        (0x3<<4)}, //auto RX
     {REG_PKT_CFG0, 0x30},        // PKT_CFG0            Packet Configuration Reg. 0 variable length packet mode
@@ -92,4 +93,4 @@ static const registerSettings settings[] = {
     {REG_IFAMP, 0x09},           // IFAMP               Intermediate Frequency Amplifier Configuration
     {REG_XOSC5, 0x0E},           // XOSC5               Crystal Oscillator Configuration Reg. 5
     {REG_XOSC1, 0x03},           // XOSC1               Crystal Oscillator Configuration Reg. 1
-		};
+};
