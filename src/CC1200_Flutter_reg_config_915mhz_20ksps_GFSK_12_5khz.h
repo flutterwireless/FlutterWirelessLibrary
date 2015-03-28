@@ -20,27 +20,28 @@
   https://www.gnu.org/licenses/lgpl-2.1.html
 */
 
-// Modulation format = 2-GFSK 
-// RX filter BW = 50.505051 
-// Packet bit length = 0 
-// Device address = 0 
-// Carrier frequency = 915.000000 
-// Manchester enable = false 
-// Packet length mode = Variable 
-// Whitening = true 
-// Bit rate = 20 
-// Address config = No address check 
-// Symbol rate = 20 
+// Modulation format = 2-GFSK
+// RX filter BW = 50.505051
+// Packet bit length = 0
+// Device address = 0
+// Carrier frequency = 915.000000
+// Manchester enable = false
+// Packet length mode = Variable
+// Whitening = true
+// Bit rate = 20
+// Address config = No address check
+// Symbol rate = 20
 // Deviation = 12.5kHz
-// Packet length = 255 
+// Packet length = 255
 
 typedef struct
 {
-int addr;
-byte data;
+    int addr;
+    byte data;
 } registerSettings;
 
-static const registerSettings settings[] = {
+static const registerSettings settings[] =
+{
     {REG_RFEND_CFG1,        (0x3<<4)|(0x7<<1)}, //auto RX
     {REG_RFEND_CFG0,        (0x3<<4)}, //auto RX
     {REG_PKT_CFG0, 0x30},        // PKT_CFG0            Packet Configuration Reg. 0 variable length packet mode
@@ -92,4 +93,4 @@ static const registerSettings settings[] = {
     {REG_IFAMP, 0x09},           // IFAMP               Intermediate Frequency Amplifier Configuration
     {REG_XOSC5, 0x0E},           // XOSC5               Crystal Oscillator Configuration Reg. 5
     {REG_XOSC1, 0x03},           // XOSC1               Crystal Oscillator Configuration Reg. 1
-		};
+};

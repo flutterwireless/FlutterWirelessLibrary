@@ -27,14 +27,14 @@
 
 #define SRES 					0x30 // Reset chip
 #define SFSTXON					0x31 // Enable and calibrate frequency synthesizer (if SETTLING_CFG.FS_AUTOCAL = 1).
-									 // If in RX and PKT_CFG2.CCA_MODE ≠ 0: Go to a wait state where only the synthesizer is
-									 // running (for quick RX/TX turnaround).
+// If in RX and PKT_CFG2.CCA_MODE ≠ 0: Go to a wait state where only the synthesizer is
+// running (for quick RX/TX turnaround).
 #define SXOFF 					0x32 // Enter XOFF state when CSn is de-asserted
 #define SCAL					0x33 // Calibrate frequency synthesizer and turn it off. SCAL can be strobed from IDLE mode without
-									 // setting manual calibration mode (SETTLING_CFG.FS_AUTOCAL = 0)
+// setting manual calibration mode (SETTLING_CFG.FS_AUTOCAL = 0)
 #define SRX 					0x34 // Enable RX. Perform calibration first if coming from IDLE and SETTLING_CFG.FS_AUTOCAL = 1
 #define STX						0x35 // In IDLE state: Enable TX. Perform calibration first if SETTLING_CFG.FS_AUTOCAL = 1. 
- 									 // If in RX state and PKT_CFG2.CCA_MODE ≠ 0: Only go to TX if channel is clear
+// If in RX state and PKT_CFG2.CCA_MODE ≠ 0: Only go to TX if channel is clear
 #define SIDLE 					0x36 // Exit RX/TX, turn off frequency synthesizer and exit eWOR mode if applicable
 #define SAFC					0x37 // Automatic Frequency Compensation
 #define SWOR 					0x38 // Start automatic RX polling sequence (eWOR) as described in Section 9.6 if WOR_CFG0.RC_PD = 0
@@ -55,7 +55,7 @@
 #define STATUS_STATE_BM                 0x70
 #define STATUS_FIFO_BYTES_AVAILABLE_BM  0x0F
 
-//Inbuilt Registers 
+//Inbuilt Registers
 
 #define REG_IOCFG3             0x0000
 #define REG_IOCFG2             0x0001
