@@ -40,7 +40,6 @@
 //Use one of the values
 #define BAND REPLACE_THIS_TEXT_WITH_YOUR_REGION_FROM_ABOVE
 
-
 #define FREQ_BANDS {865000000,902000000,915000000,925000000} //hz
 #define NUM_CHANNELS {60,520,260,60} //hz
 #define NUM_BANDS 4
@@ -95,44 +94,44 @@
 
 typedef struct
 {
-int16_t micros;
-int16_t millis;
-int32_t seconds;
+    int16_t micros;
+    int16_t millis;
+    int32_t seconds;
 } timeType;
 
 
 class Network
 {
-  public:
-  	Network();
-  	boolean init(byte _band);
+public:
+    Network();
+    boolean init(byte _band);
     volatile byte address;
     volatile byte band;
     uint16_t channelIndex;
-  	uint16_t channel;
-  	uint16_t channelList[51];
-  	String networkName;
-  	byte networkStatus;
-  	volatile timeType time;
+    uint16_t channel;
+    uint16_t channelList[51];
+    String networkName;
+    byte networkStatus;
+    volatile timeType time;
     volatile timeType lastPacketTime;
     volatile int radioState;
     volatile boolean rxPending;
     boolean synchronized;
 
-   // byte txBuffer[BUFFER_SIZE];
-   // byte rxBuffer[BUFFER_SIZE];
+    // byte txBuffer[BUFFER_SIZE];
+    // byte rxBuffer[BUFFER_SIZE];
 
-   // byte txBufferIndex;
-   // byte rxBufferIndex;
+    // byte txBufferIndex;
+    // byte rxBufferIndex;
 
-  	boolean asleep;
+    boolean asleep;
     volatile boolean txBlocked;
 
     void setAddress(int _address);
-  	void setNetworkName(String _NetworkName);
-  	boolean setChannel(uint32_t _channel);
+    void setNetworkName(String _NetworkName);
+    boolean setChannel(uint32_t _channel);
     boolean setChannelByIndex(uint32_t _channel);
-  	int radioInterrupt();
+    int radioInterrupt();
     boolean tickInterrupt();
     boolean softInt();
     void connect(uint16_t devices);
@@ -150,14 +149,14 @@ class Network
     int nextPacket();
     int nextPacketLength();
 
-  private:
+private:
 
 
-    
+
 
     void pinDebug(int pin, int value);
 
-    
+
 
     byte queuedTXCommands;
     byte commandQueueTX[COMMAND_QUEUE_SIZE][3];
@@ -173,10 +172,10 @@ class Network
 
     byte pendingRxPacket;
     void printChannelList();
-  	void generateChannelList(String name);
-  	void generateChannelList(uint16_t seed);
+    void generateChannelList(String name);
+    void generateChannelList(uint16_t seed);
     uint16_t generateSeed(String name);
-  	uint16_t networkSeed;
+    uint16_t networkSeed;
     void setMicros(uint32_t value) ;
     void processNormalOperation();
     boolean hop();
@@ -184,14 +183,14 @@ class Network
     void transmitSyncPacket(byte destaddress);
     int readPacket();
     byte processRXPacket(byte packetLength);
-   
+
     byte queueRXPacket(byte packetLength);
 
     void dequeueTXBytes(int index);
     void dequeueRXPacket(int index);
 
     void queueCommand(byte cmd, byte start, byte length);
-    
+
     void requestHost(uint16_t devices);
 
     void updateLastPacketTime();

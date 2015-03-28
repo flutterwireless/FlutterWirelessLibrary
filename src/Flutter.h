@@ -75,43 +75,43 @@
 
 class Flutter
 {
-    public:
+public:
 
 
-        Flutter();
-        volatile boolean initialized;
-        boolean synchronized;
-        
-
-	    boolean init();
-        void setLED(int red, int green, int blue);
-    	byte sendData(byte data, byte address);
-    	byte sendData(byte data[], byte length, byte address);
-    	byte next();
-    	void connect(uint16_t devices);
+    Flutter();
+    volatile boolean initialized;
+    boolean synchronized;
 
 
-        void setNetworkName(String name);
-        void setAddress(int address);
+    boolean init();
+    void setLED(int red, int green, int blue);
+    byte sendData(byte data, byte address);
+    byte sendData(byte data[], byte length, byte address);
+    byte next();
+    void connect(uint16_t devices);
 
-        int interrupt();
-        boolean processSoftInt();
-        boolean tickInt();
 
-        void ledLightShow();
+    void setNetworkName(String name);
+    void setAddress(int address);
 
-        int getState();
-        int dataAvailable();
-        int nextPacket();
-        int nextPacketLength();
-        int readBytes(byte *array,int packetSize);
+    int interrupt();
+    boolean processSoftInt();
+    boolean tickInt();
 
-        int packetRSSI(byte *array,int packetSize);
+    void ledLightShow();
 
-    private:
-        void setRadioPins();
-        void setFlutterPins();
-        void setInterrupts();
+    int getState();
+    int dataAvailable();
+    int nextPacket();
+    int nextPacketLength();
+    int readBytes(byte *array,int packetSize);
+
+    int packetRSSI(byte *array,int packetSize);
+
+private:
+    void setRadioPins();
+    void setFlutterPins();
+    void setInterrupts();
 };
 
 

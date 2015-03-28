@@ -32,28 +32,28 @@
 
 class Radio
 {
-  public:
+public:
     Radio();
     boolean init();
 
-  	boolean enabled;
-  	boolean awake;
-  	uint32_t baseFrequency;
+    boolean enabled;
+    boolean awake;
+    uint32_t baseFrequency;
     boolean setFrequency(uint32_t frequency);
     void setAddress(byte address);
 
     byte bytesAvailable();
     boolean readRX(Queue& rxBuffer, byte bytesToRead);
 
-  	boolean enable();
+    boolean enable();
     boolean transmit(byte *data, byte start, byte length);
     boolean transmit(byte *data, byte length);
     void clearRXFIFO();
 
-  private:
+private:
 
 
-  	
+
 };
 
 

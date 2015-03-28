@@ -21,27 +21,28 @@
 */
 
 
-// Carrier frequency = 915.000000 
-// Manchester enable = false 
-// Whitening = true 
-// Symbol rate = 1.2 
-// Device address = 0 
-// Modulation format = 2-FSK 
-// RX filter BW = 10.964912 
-// Packet length = 255 
-// Deviation = 3.986359 
-// Address config = No address check 
-// Packet length mode = Variable 
-// Packet bit length = 0 
-// Bit rate = 1.2 
+// Carrier frequency = 915.000000
+// Manchester enable = false
+// Whitening = true
+// Symbol rate = 1.2
+// Device address = 0
+// Modulation format = 2-FSK
+// RX filter BW = 10.964912
+// Packet length = 255
+// Deviation = 3.986359
+// Address config = No address check
+// Packet length mode = Variable
+// Packet bit length = 0
+// Bit rate = 1.2
 
 typedef struct
 {
-int addr;
-byte data;
+    int addr;
+    byte data;
 } registerSettings;
 
-static const registerSettings settings[] = {
+static const registerSettings settings[] =
+{
     {REG_RFEND_CFG1,        (0x3<<4)|(0x7<<1)}, //auto RX
     {REG_RFEND_CFG0,        (0x3<<4)}, //auto RX
     {REG_IOCFG0,        0x06},
@@ -91,4 +92,4 @@ static const registerSettings settings[] = {
     {REG_FS_VCO0, 0xB5},         // FS_VCO0             FS Voltage Controlled Oscillator Configuration Reg..
     {REG_XOSC5, 0x0E},           // XOSC5               Crystal Oscillator Configuration Reg. 5
     {REG_XOSC1, 0x03},           // XOSC1               Crystal Oscillator Configuration Reg. 1
-		};
+};
