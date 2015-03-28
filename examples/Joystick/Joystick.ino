@@ -96,7 +96,7 @@ void loop() {
 
 	
 	
-	delay(40); //spend some time smelling the roses
+	delay(20); //spend some time smelling the roses
 
 	
 

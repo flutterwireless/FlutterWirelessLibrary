@@ -30,10 +30,11 @@ volatile bool updateSysTick = false;
 static const uint32_t bands[] = FREQ_BANDS;
 static const uint32_t numChannels[] = NUM_CHANNELS;
 
-
+volatile int pin = 6;
 
 #define HOPTIME 40 //ms per hop
-#define TXTIME 3 //ms into hop
+#define TXTIME1 1 //ms into hop
+#define TXTIME2 20 //ms into hop
 #define TIMING_ADJUST 6900-3320 //us to add for timing adjustment
 //#define TIMING_ADJUST -4000 //us to add for timing adjustment
 
@@ -58,6 +59,7 @@ Network::Network(){
   time.micros = 0;
   time.millis = 0;
   time.seconds = 0;
+  paused = false;
 }
 
 //configuration functions
@@ -239,8 +241,9 @@ void Network::printTime()
 boolean Network::softInt() //software interrupt
 {
   interrupts();
+   
 
-
+ 
   if(time.millis==0) 
     {
      // printTime();
@@ -307,7 +310,6 @@ boolean Network::softInt() //software interrupt
 		break;
   }
 
-  
   return true;
 }
 
@@ -389,7 +391,7 @@ void Network::processNormalOperation()
 
 
 
-  if(time.millis%HOPTIME==TXTIME)
+  if(time.millis%HOPTIME==TXTIME1 || time.millis%HOPTIME==TXTIME2)
   {
 
     #ifdef TESTMODE
@@ -404,12 +406,12 @@ void Network::processNormalOperation()
     }
     #endif
 
-    if(channelIndex == TIMING_CH_INDEX && address == MASTER_ADDRESS)
+    if(channelIndex == TIMING_CH_INDEX && address == MASTER_ADDRESS && time.millis%HOPTIME==TXTIME1)
     {
       transmitSyncPacket(0x00);
     }
 
-    if(channelIndex!= TIMING_CH_INDEX)// && time.micros%HOPTIME <=45000)
+    if(channelIndex!= TIMING_CH_INDEX || time.millis%HOPTIME==TXTIME2)// && time.micros%HOPTIME <=45000)
     {
      // Serial.println("Processing Queue");
      // processQueue();
@@ -698,55 +700,36 @@ boolean Network::hop()
 {
   //channel = (time.micros*200)/1000000;
 
-  pinDebug(7, HIGH);
-
   if(channelIndex==TIMING_CH_INDEX && networkStatus!=NORMAL_OPERATION && address != MASTER_ADDRESS)
   {
       return false; //don't hop if sync not recieved
   }
 
+  pinDebug(7, HIGH);
+
+
     channelIndex++;
-
-  if(channelIndex>=50)
-  {
-    channelIndex=0;
-    if(address!=MASTER_ADDRESS)
+    if(channelIndex>=50)
     {
-      networkStatus=SYNC_WAIT;
+    channelIndex=0;
+
     }
-    
-  }else{
-  
-  }
 
-/*
-  if(channel == BASE_CHANNEL)
-  {
-    synchronized=false;
-  }  
-*/
-
-
+    if(address!=MASTER_ADDRESS && address==TIMING_CH_INDEX)
+    {
+    networkStatus=SYNC_WAIT;
+    }
 
 
     #ifdef DEBUG1
          Serial.print("Setting radio to channel ");
          Serial.println(channelIndex);
     #endif
-    int errors = 0;
-    while(setChannelByIndex(channelIndex)==false)
-    {
-      errors++;
-      if(errors>5)
-      {
-        //do something if there is an error.
-        #ifdef DEBUG 
-         Serial.println("Set Frequency Failed!");
-       #endif
-        return false;
-       // break;
-      }
-    }
+    
+    if(paused==true && channelIndex!=TIMING_CH_INDEX)
+      return false;
+    
+    setChannelByIndex(channelIndex);
 
     pinDebug(7, LOW);
     return true;
@@ -815,19 +798,20 @@ boolean Network::tickInterrupt()
       switch(tickTime)
       {
         case 0:
-        hopNow = true;
+          hopNow = true;
         if(queuedTXCommands>0 && channelIndex!= 49)
         {
        //   scheduledTask=TX_TASK;
         //  scheduledMicros=3000;
         }
-        case TXTIME:
+        case TXTIME1:
+        softInterrupt();
+        case TXTIME2:
         softInterrupt();
         break;
       }
 		break;
   }
-
 
 
   pinDebug(6,LOW);
@@ -838,7 +822,13 @@ boolean Network::tickInterrupt()
 void Network::pinDebug(int pin, int value)
 {
   #ifdef PIN_DEBUG
-  digitalWrite(pin,value);
+  if(value==HIGH)
+  {
+    g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;
+  }
+  else{
+    g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin;
+  }
   #endif
 }
 

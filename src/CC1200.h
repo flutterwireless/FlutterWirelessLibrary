@@ -29,6 +29,7 @@
 #include "REG_CC1200.h"
 #include "CC1200_Flutter_reg_config_915mhz_20ksps_GFSK_12_5khz.h"
 //#include "CC1200_Flutter_reg_config_915mhz_1ksps.h"
+//#include "CC1200_Flutter_reg_config_915mhz_1000ksps.h"
 
 //#include <libraries/SPI/SPI.h>
 #include <SPI.h>

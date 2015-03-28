@@ -29,7 +29,7 @@
 // Packet length mode = Variable 
 // Whitening = true 
 // Bit rate = 20 
-// Address config = No address check 
+// Address config = Address checking, 0x00 is broadcast address. 
 // Symbol rate = 20 
 // Deviation = 12.5kHz
 // Packet length = 255 

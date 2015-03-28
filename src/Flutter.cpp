@@ -212,6 +212,17 @@ void Flutter::setInterrupts()
   attachInterrupt(BUTTON2, button2, CHANGE);
 }
 
+void Flutter::pause()
+{
+    network.paused=true;
+}
+
+void Flutter::resume()
+{
+    network.paused=false;
+}
+
+
 int Flutter::interrupt()
 {
   return network.radioInterrupt();

@@ -68,9 +68,9 @@
 
 //test and debugging
 
-#define DEBUG
+//#define DEBUG
 //#define RADIOTESTMODE
-#define PIN_DEBUG
+//#define PIN_DEBUG
 
 
 class Flutter
@@ -107,6 +107,8 @@ class Flutter
         int readBytes(byte *array,int packetSize);
 
         int packetRSSI(byte *array,int packetSize);
+        void pause();
+        void resume();
 
     private:
         void setRadioPins();

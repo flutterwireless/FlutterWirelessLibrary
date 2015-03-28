@@ -95,9 +95,9 @@
 
 typedef struct
 {
-int16_t micros;
-int16_t millis;
-int32_t seconds;
+int_fast16_t micros;
+int_fast16_t millis;
+int_fast32_t seconds;
 } timeType;
 
 
@@ -118,6 +118,7 @@ class Network
     volatile int radioState;
     volatile boolean rxPending;
     boolean synchronized;
+    boolean paused;
 
    // byte txBuffer[BUFFER_SIZE];
    // byte rxBuffer[BUFFER_SIZE];
