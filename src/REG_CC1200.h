@@ -16,7 +16,7 @@
   along with this program. If not, the license is also available here:
   http://www.gnu.org/licenses/
 */
-  
+
 
 #ifndef REG_CC1200_H
 #define REG_CC1200_H

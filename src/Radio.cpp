@@ -16,15 +16,16 @@
   along with this program. If not, the license is also available here:
   http://www.gnu.org/licenses/
 */
-  
+
 
 #include "Radio.h"
 
 CC1200 ccradio;
 
 //Constructor
-Radio::Radio(){
-  //do any class initialization here
+Radio::Radio()
+{
+	//do any class initialization here
 	enabled = false;
 	awake = false;
 }
@@ -57,12 +58,12 @@ byte Radio::bytesAvailable()
 
 boolean Radio::readRX(Queue& rxBuffer, byte bytesToRead)
 {
-	return ccradio.readRX(rxBuffer,bytesToRead);
+	return ccradio.readRX(rxBuffer, bytesToRead);
 }
 
 void Radio::setAddress(byte address)
 {
-  ccradio.setAddress(address);
+	ccradio.setAddress(address);
 }
 
 void Radio::clearRXFIFO()

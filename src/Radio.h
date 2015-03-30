@@ -31,22 +31,22 @@
 class Radio
 {
 public:
-    Radio();
-    boolean init();
+	Radio();
+	boolean init();
 
-    boolean enabled;
-    boolean awake;
-    uint32_t baseFrequency;
-    boolean setFrequency(uint32_t frequency);
-    void setAddress(byte address);
+	boolean enabled;
+	boolean awake;
+	uint32_t baseFrequency;
+	boolean setFrequency(uint32_t frequency);
+	void setAddress(byte address);
 
-    byte bytesAvailable();
-    boolean readRX(Queue& rxBuffer, byte bytesToRead);
+	byte bytesAvailable();
+	boolean readRX(Queue& rxBuffer, byte bytesToRead);
 
-    boolean enable();
-    boolean transmit(byte *data, byte start, byte length);
-    boolean transmit(byte *data, byte length);
-    void clearRXFIFO();
+	boolean enable();
+	boolean transmit(byte *data, byte start, byte length);
+	boolean transmit(byte *data, byte length);
+	void clearRXFIFO();
 
 private:
 
