@@ -65,78 +65,78 @@ class CC1200
 {
 
 public:
-    byte state;
-    volatile byte flutterRadioState;
-    volatile byte chipStatus;
-    volatile boolean byteCapture;
-    volatile byte power;
-    volatile uint32_t channel;
-    volatile int interruptCount;
-    boolean asleep;
-    void setLED(byte red, byte green, byte blue);
-    void rxTestMode();
-    void txTestMode();
+	byte state;
+	volatile byte flutterRadioState;
+	volatile byte chipStatus;
+	volatile boolean byteCapture;
+	volatile byte power;
+	volatile uint32_t channel;
+	volatile int interruptCount;
+	boolean asleep;
+	void setLED(byte red, byte green, byte blue);
+	void rxTestMode();
+	void txTestMode();
 
 
-    CC1200();
-    boolean init();
-    byte getState();
-    void flushRX();
-    void flushTX();
-    void reset();
-    byte setState(byte setState);
-    void enterSleep();
-    void exitSleep();
-    boolean transmit(byte data[], byte start, byte length);
-    boolean readRX(Queue& rxBuffer, byte bytesToRead);
-    byte bytesAvailable();
-    byte readRSSI();
+	CC1200();
+	boolean init();
+	byte getState();
+	void flushRX();
+	void flushTX();
+	void reset();
+	byte setState(byte setState);
+	void enterSleep();
+	void exitSleep();
+	boolean transmit(byte data[], byte start, byte length);
+	boolean readRX(Queue& rxBuffer, byte bytesToRead);
+	byte bytesAvailable();
+	byte readRSSI();
 
-    boolean sleep(boolean _sleep);
+	boolean sleep(boolean _sleep);
 
-    byte ccGetTxStatus(void);
-    byte ccGetRxStatus(void);
-    boolean SetFrequency(uint32_t frequency);
-    void setAddress(byte address);
-    boolean txBytes(byte _bytes);
-    void setBand(byte _band);
+	byte ccGetTxStatus(void);
+	byte ccGetRxStatus(void);
+	boolean SetFrequency(uint32_t frequency);
+	void setAddress(byte address);
+	boolean txBytes(byte _bytes);
+	void setBand(byte _band);
 
-    byte printMARC();
+	byte printMARC();
 
-    void clearRXFIFO();
+	void clearRXFIFO();
 
 private:
 
 
 
-    void WriteReg(uint16_t, byte);
-    byte ReadReg(uint16_t);
-    void ReadBurstReg(byte addr, byte *buffer, byte count);
-    void WriteBurstReg(byte addr, byte *buffer, byte count);
-    void readConfigRegs(void);
+	void WriteReg(uint16_t, byte);
+	byte ReadReg(uint16_t);
+	void ReadBurstReg(byte addr, byte *buffer, byte count);
+	void WriteBurstReg(byte addr, byte *buffer, byte count);
+	void readConfigRegs(void);
 
 
-    //debugging
-    void printBuffer(byte *buffer, byte length);
-    void printReg(uint16_t reg, String name);
+	//debugging
+	void printBuffer(byte *buffer, byte length);
+	void printReg(uint16_t reg, String name);
 
 
-    //SPI communications
-    void ccReadWriteBurstSingle(byte addr, byte *pData, uint16_t len, uint16_t dataStart);
-    byte cc16BitRegAccess(byte accessType, byte extAddr, byte regAddr, byte *pData, uint16_t len);
-    byte cc8BitRegAccess(byte accessType, byte addrByte, byte *pData, uint16_t len, uint16_t dataStart);
-    byte SendStrobe(byte);
-    byte SPItransfer(byte dataOut);
+	//SPI communications
+	void ccReadWriteBurstSingle(byte addr, byte *pData, uint16_t len, uint16_t dataStart);
+	byte cc16BitRegAccess(byte accessType, byte extAddr, byte regAddr, byte *pData, uint16_t len);
+	byte cc8BitRegAccess(byte accessType, byte addrByte, byte *pData, uint16_t len, uint16_t dataStart);
+	byte SendStrobe(byte);
+	byte SPItransfer(byte dataOut);
 
-    //register access
-    byte ccWriteReg(uint16_t addr, byte *pData, byte len);
-    byte ccReadReg(uint16_t addr, byte *pData, byte len);
-    byte ccWriteTxFifo(byte *pData, byte len);
-    byte ccReadRxFifo(byte * pData, byte len, uint16_t dataStart);
+	//register access
+	byte ccWriteReg(uint16_t addr, byte *pData, byte len);
+	byte ccReadReg(uint16_t addr, byte *pData, byte len);
+	byte ccWriteTxFifo(byte *pData, byte len);
+	byte ccReadRxFifo(byte * pData, byte len, uint16_t dataStart);
 
 
-    //configutation
-    uint16_t registerConfig(void);
+	//configutation
+	uint16_t registerConfig(void);
 
 
 };

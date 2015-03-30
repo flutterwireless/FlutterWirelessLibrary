@@ -92,110 +92,110 @@
 
 typedef struct
 {
-int_fast16_t micros;
-int_fast16_t millis;
-int_fast32_t seconds;
+	int_fast16_t micros;
+	int_fast16_t millis;
+	int_fast32_t seconds;
 } timeType;
 
 
 class Network
 {
-  public:
-  	Network();
-  	boolean init(byte _band);
-    volatile byte address;
-    volatile byte band;
-    uint16_t channelIndex;
-  	uint16_t channel;
-  	uint16_t channelList[51];
-  	String networkName;
-  	byte networkStatus;
-  	volatile timeType time;
-    volatile timeType lastPacketTime;
-    volatile int radioState;
-    volatile boolean rxPending;
-    boolean synchronized;
-    boolean paused;
-   // byte txBuffer[BUFFER_SIZE];
-   // byte rxBuffer[BUFFER_SIZE];
+public:
+	Network();
+	boolean init(byte _band);
+	volatile byte address;
+	volatile byte band;
+	uint16_t channelIndex;
+	uint16_t channel;
+	uint16_t channelList[51];
+	String networkName;
+	byte networkStatus;
+	volatile timeType time;
+	volatile timeType lastPacketTime;
+	volatile int radioState;
+	volatile boolean rxPending;
+	boolean synchronized;
+	boolean paused;
+	// byte txBuffer[BUFFER_SIZE];
+	// byte rxBuffer[BUFFER_SIZE];
 
-   // byte txBufferIndex;
-   // byte rxBufferIndex;
+	// byte txBufferIndex;
+	// byte rxBufferIndex;
 
-  	boolean asleep;
-    volatile boolean txBlocked;
+	boolean asleep;
+	volatile boolean txBlocked;
 
-    void setAddress(int _address);
-  	void setNetworkName(String _NetworkName);
-  	boolean setChannel(uint32_t _channel);
-    boolean setChannelByIndex(uint32_t _channel);
-  	int radioInterrupt();
-    boolean tickInterrupt();
-    boolean softInt();
-    void connect(uint16_t devices);
+	void setAddress(int _address);
+	void setNetworkName(String _NetworkName);
+	boolean setChannel(uint32_t _channel);
+	boolean setChannelByIndex(uint32_t _channel);
+	int radioInterrupt();
+	boolean tickInterrupt();
+	boolean softInt();
+	void connect(uint16_t devices);
 
-    int queueDataPacket(byte command, byte *tx, byte length, byte destaddress);
-
-
-    int readBytes(byte *array,int packetSize);
-
-    Queue::Queue rxBuffer;
-    Queue::Queue txBuffer;
-    Queue::Queue userBuffer;
-
-    int dataAvailable();
-    int nextPacket();
-    int nextPacketLength();
-
-  private:
+	int queueDataPacket(byte command, byte *tx, byte length, byte destaddress);
 
 
-    
+	int readBytes(byte *array, int packetSize);
 
-    void pinDebug(int pin, int value);
+	Queue::Queue rxBuffer;
+	Queue::Queue txBuffer;
+	Queue::Queue userBuffer;
 
-    
+	int dataAvailable();
+	int nextPacket();
+	int nextPacketLength();
 
-    byte queuedTXCommands;
-    byte commandQueueTX[COMMAND_QUEUE_SIZE][3];
+private:
 
-    byte queuedRXPackets;
-    byte packetQueueRX[RX_PACKET_QUEUE_SIZE][3];
 
-    void printTime();
 
-    uint16_t scheduledMicros;
-    byte scheduledTask;
-    void scheduleTask(uint16_t micros, byte task);
 
-    byte pendingRxPacket;
-    void printChannelList();
-  	void generateChannelList(String name);
-  	void generateChannelList(uint16_t seed);
-    uint16_t generateSeed(String name);
-  	uint16_t networkSeed;
-    void setMicros(uint32_t value) ;
-    void processNormalOperation();
-    boolean hop();
-    void transmitOrphanSearchPacket();
-    void transmitSyncPacket(byte destaddress);
-    int readPacket();
-    byte processRXPacket(byte packetLength);
-   
-    byte queueRXPacket(byte packetLength);
+	void pinDebug(int pin, int value);
 
-    void dequeueTXBytes(int index);
-    void dequeueRXPacket(int index);
 
-    void queueCommand(byte cmd, byte start, byte length);
-    
-    void requestHost(uint16_t devices);
 
-    void updateLastPacketTime();
-    void syncTime(byte packetLength);
+	byte queuedTXCommands;
+	byte commandQueueTX[COMMAND_QUEUE_SIZE][3];
 
-    void txNext();
-    void transmitPacket(int index);
+	byte queuedRXPackets;
+	byte packetQueueRX[RX_PACKET_QUEUE_SIZE][3];
+
+	void printTime();
+
+	uint16_t scheduledMicros;
+	byte scheduledTask;
+	void scheduleTask(uint16_t micros, byte task);
+
+	byte pendingRxPacket;
+	void printChannelList();
+	void generateChannelList(String name);
+	void generateChannelList(uint16_t seed);
+	uint16_t generateSeed(String name);
+	uint16_t networkSeed;
+	void setMicros(uint32_t value) ;
+	void processNormalOperation();
+	boolean hop();
+	void transmitOrphanSearchPacket();
+	void transmitSyncPacket(byte destaddress);
+	int readPacket();
+	byte processRXPacket(byte packetLength);
+
+	byte queueRXPacket(byte packetLength);
+
+	void dequeueTXBytes(int index);
+	void dequeueRXPacket(int index);
+
+	void queueCommand(byte cmd, byte start, byte length);
+
+	void requestHost(uint16_t devices);
+
+	void updateLastPacketTime();
+	void syncTime(byte packetLength);
+
+	void txNext();
+	void transmitPacket(int index);
 };
 
 

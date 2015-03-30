@@ -16,7 +16,7 @@
   along with this program. If not, the license is also available here:
   http://www.gnu.org/licenses/
 */
-  
+
 
 #ifndef Flutter_h
 #define Flutter_h
@@ -73,44 +73,44 @@
 
 class Flutter
 {
-    public:
+public:
 
 
-        Flutter();
-        volatile boolean initialized;
-        boolean synchronized;
-        
+	Flutter();
+	volatile boolean initialized;
+	boolean synchronized;
 
-	    boolean init();
-        void setLED(int red, int green, int blue);
-    	byte sendData(byte data, byte address);
-    	byte sendData(byte data[], byte length, byte address);
-    	byte next();
-    	void connect(uint16_t devices);
 
-        void setNetworkName(String name);
-        void setAddress(int address);
+	boolean init();
+	void setLED(int red, int green, int blue);
+	byte sendData(byte data, byte address);
+	byte sendData(byte data[], byte length, byte address);
+	byte next();
+	void connect(uint16_t devices);
 
-        int interrupt();
-        boolean processSoftInt();
-        boolean tickInt();
+	void setNetworkName(String name);
+	void setAddress(int address);
 
-        void ledLightShow();
+	int interrupt();
+	boolean processSoftInt();
+	boolean tickInt();
 
-        int getState();
-        int dataAvailable();
-        int nextPacket();
-        int nextPacketLength();
-        int readBytes(byte *array,int packetSize);
+	void ledLightShow();
 
-        int packetRSSI(byte *array,int packetSize);
-        void pause();
-        void resume();
+	int getState();
+	int dataAvailable();
+	int nextPacket();
+	int nextPacketLength();
+	int readBytes(byte *array, int packetSize);
 
-    private:
-        void setRadioPins();
-        void setFlutterPins();
-        void setInterrupts();
+	int packetRSSI(byte *array, int packetSize);
+	void pause();
+	void resume();
+
+private:
+	void setRadioPins();
+	void setFlutterPins();
+	void setInterrupts();
 };
 
 

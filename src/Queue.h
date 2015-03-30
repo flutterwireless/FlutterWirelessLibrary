@@ -16,7 +16,7 @@
   along with this program. If not, the license is also available here:
   http://www.gnu.org/licenses/
 */
-  
+
 #ifndef Queue_h
 #define Queue_h
 
@@ -28,17 +28,17 @@ class Queue
 {
 
 public:
-    byte array[QUEUESIZE];
-    byte end;
-    Queue();
-    ~Queue();
-    void insert(byte data);
-    int read();
-    boolean write(byte);
-    void clear();
-    byte bytesAvailable();
-    byte bytesEnd();
-    byte capacity();
+	byte array[QUEUESIZE];
+	byte end;
+	Queue();
+	~Queue();
+	void insert(byte data);
+	int read();
+	boolean write(byte);
+	void clear();
+	byte bytesAvailable();
+	byte bytesEnd();
+	byte capacity();
 };
 
 #endif

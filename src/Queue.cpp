@@ -21,7 +21,7 @@
 
 Queue::Queue()
 {
-end=0;
+	end = 0;
 }
 
 Queue::~Queue()
@@ -32,10 +32,11 @@ Queue::~Queue()
 
 boolean Queue::write(byte data)
 {
-	if(bytesAvailable()<1)
+	if (bytesAvailable() < 1)
 	{
 		return false;
 	}
+
 	array[end] = data;
 	end++;
 	return true;
@@ -43,26 +44,31 @@ boolean Queue::write(byte data)
 
 void Queue::clear()
 {
-	end=0;	
+	end = 0;
 }
 
 
 int Queue::read()
 {
-	if(end==0) return -1;
+	if (end == 0)
+	{
+		return -1;
+	}
 
 	byte next = array[0];
-	for(int i=0; i<end;i++)
+
+	for (int i = 0; i < end; i++)
 	{
-		array[i]=array[i+1]; //yes this is a dumb but quick way of dealing with the array. Feel free to improve it...
+		array[i] = array[i + 1]; //yes this is a dumb but quick way of dealing with the array. Feel free to improve it...
 	}
+
 	end--;
 	return next;
 }
 
 byte Queue::bytesAvailable()
 {
-	return QUEUESIZE-end;
+	return QUEUESIZE - end;
 }
 
 byte Queue::bytesEnd()
