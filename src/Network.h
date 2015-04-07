@@ -36,7 +36,7 @@
 //Falure to properly set this value can result in serious harmful operation.
 //If not properly configured, the device may cause harmful interference to critical emergency services.
 //Use one of the values
-#define BAND REPLACE_THIS_TEXT_WITH_YOUR_REGION_FROM_ABOVE
+//#define BAND REPLACE_THIS_TEXT_WITH_YOUR_REGION_FROM_ABOVE
 
 #define FREQ_BANDS {865000000,902000000,915000000,925000000} //hz
 #define NUM_CHANNELS {60,520,260,60} //hz

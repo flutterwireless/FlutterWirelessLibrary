@@ -79,7 +79,7 @@ public:
 	Flutter();
 	volatile boolean initialized;
 	boolean synchronized;
-
+	byte band;
 
 	boolean init();
 	void setLED(int red, int green, int blue);

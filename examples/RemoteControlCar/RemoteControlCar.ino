@@ -29,6 +29,7 @@ Flutter flutter;
 void setup()
 {
 	Serial.begin(115200);
+	flutter.band = NORTH_AMERICA;
 	flutter.setNetworkName("Home network");
 	pinMode(STEERINGPIN, OUTPUT);
 	pinMode(THROTTLEPIN, OUTPUT);
