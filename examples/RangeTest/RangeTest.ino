@@ -30,6 +30,7 @@ byte mydata = 0;
 void setup()
 {
 	Serial.begin(115200);
+	flutter.band = NORTH_AMERICA;
 	flutter.setNetworkName("Range Test");
 	Serial.println("Initializing...");
 

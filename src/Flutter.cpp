@@ -39,7 +39,7 @@ Flutter::Flutter()
 
 boolean Flutter::init()
 {
-	initialized = network.init(BAND);
+	initialized = network.init(band);
 	return initialized;
 }
 
