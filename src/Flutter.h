@@ -34,6 +34,18 @@
 //Radio Configuration
 
 //radio states
+typedef enum _RADIO_STATE_
+{
+    RADIO_STATE_IDLE = 0, 
+    RADIO_STATE_RXIDLE, 
+    RADIO_STATE_RXACTIVE,  
+    RADIO_STATE_TXPENDING, //aka TXWAIT
+    RADIO_STATE_TXACTIVE, ///(5)
+    RADIO_STATE_TXFAILED, 
+    RADIO_STATE_TXSUCCEEDED, 
+} RADIO_STATE;
+
+#warning DEPRECATED. Move to enum please, these will be removed soon
 #define IDLE (byte)0
 #define RXIDLE (byte)1
 #define RXACTIVE (byte)2

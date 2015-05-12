@@ -17,37 +17,27 @@
   http://www.gnu.org/licenses/
 */
 
+/**********  System Includes ************************************************/
+#include <math.h>
 
+/**********  Project Includes ***********************************************/
 #include "CC1200.h"
 
 
-//#include <SPI.h>
-#include <math.h>
+/******* Private global variables *******************************************/
 
-int frequencyHop = 0; //amount to add to frequency setting in Hz
+/******* Private Defines and data types *************************************/
 
 #define FREQ_ADJ 0
 
+/****** Public Class Functions **********************************************/
 CC1200::CC1200()
 {
 	//do any class initialization here
-	byteCapture = false;
 	chipStatus = 0;
-	flutterRadioState = RADIO_IDLE;
-	power = 0;
 	asleep = false;
 }
 
-void CC1200::printReg(uint16_t reg, String name)
-{
-	byte val = ReadReg(reg);
-	Serial.print("Register ");
-	Serial.print(name);
-	Serial.print(" at address 0x");
-	Serial.print(reg, HEX);
-	Serial.print(" is 0x");
-	Serial.println(val, HEX);
-}
 
 boolean CC1200::txBytes(byte _bytes)
 {
@@ -70,7 +60,7 @@ boolean CC1200::txBytes(byte _bytes)
 	}
 	else
 	{
-		setState(RADIO_TX); //just TX the preamble forever
+		setState(CT1200_TX); //just TX the preamble forever
 	}
 }
 
@@ -80,11 +70,11 @@ boolean CC1200::sleep(boolean _sleep)
 
 	if (asleep)
 	{
-		setState(RADIO_IDLE);
+		setState(CT1200_IDLE);
 	}
 	else
 	{
-		setState(RADIO_RX);
+		setState(CT1200_RX);
 	}
 
 	return true;
@@ -111,7 +101,7 @@ boolean CC1200::init()
 	//printMARC();
 	//readConfigRegs();
 	//SetFrequency(915);
-	setState(RADIO_RX);
+	setState(CT1200_RX);
 	//rxTestMode();
 	//txTestMode();
 	return true;
@@ -128,7 +118,7 @@ void CC1200::setAddress(byte address)
 boolean CC1200::SetFrequency(uint32_t frequency)
 {
 	//digitalWrite(8,HIGH);
-	setState(RADIO_IDLE);
+	setState(CT1200_IDLE);
 	SendStrobe(SFRX);
 	int freq = 0.0065536f * frequency; //magic number comes from simplification of calculations from the datasheet with 40MHz crystal and LO Divider of 4.
 	byte f0 = 0xFF & freq;
@@ -147,7 +137,7 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 	WriteReg(REG_FREQ0, f0);
 	WriteReg(REG_FREQ1, f1);
 	WriteReg(REG_FREQ2, f2);
-	setState(RADIO_RX);
+	setState(CT1200_RX);
 
 	if (ReadReg(REG_FREQ0) == f0 && ReadReg(REG_FREQ1) == f1 && ReadReg(REG_FREQ2) == f2)
 	{
@@ -161,31 +151,6 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 	}
 }
 
-#ifdef RADIOTESTMODE
-void CC1200::txTestMode()
-{
-	//TX test mode settings
-	setState(RADIO_TX); //TX test mode ONLY
-
-	while (1);
-}
-
-void CC1200::rxTestMode()
-{
-	//RX test mode settings
-#define SYNCHRONOUS //comment this out for transparent mode (no timing recovery)
-#ifdef SYNCHRONOUS
-	WriteReg(REG_PREAMBLE_CFG1, 0); //No preamble
-	WriteReg(REG_SYNC_CFG1, 0x0A); //No sync uint16_t
-	WriteReg(REG_PKT_CFG2, 0x1); //Synchronous serial mode
-#else
-	WriteReg(REG_PKT_CFG2, 0x3); //Packet mode = transparent
-	WriteReg(REG_MDMCFG0, 0x45); //Transparent mode on
-#endif
-	WriteReg(REG_MDMCFG1, 0x02); //FIFO OFF
-	WriteReg(REG_IOCFG3, 0x09); //send symbols out pin D18
-}
-#endif
 
 uint16_t CC1200::registerConfig(void)
 {
@@ -233,17 +198,7 @@ uint16_t CC1200::registerConfig(void)
 
 
 
-void CC1200::printBuffer(byte *buffer, byte length)
-{
-	for (int i = 0; i < length; i++)
-	{
-		Serial.print("[0x");
-		Serial.print(buffer[i], HEX);
-		Serial.print("]");
-	}
 
-	Serial.println();
-}
 #ifdef DEBUG1
 
 byte CC1200::printMARC()
@@ -279,28 +234,28 @@ void CC1200::printRadioState(byte state)
 {
 	switch (state)
 	{
-		case RADIO_IDLE:
-			Serial.print("RADIO_IDLE");
+		case CT1200_IDLE:
+			Serial.print("CT1200_IDLE");
 			break;
 
-		case RADIO_RXWAIT:
-			Serial.print("RADIO_RXWAIT");
+		case CT1200_RXWAIT:
+			Serial.print("CT1200_RXWAIT");
 			break;
 
-		case RADIO_RXACTIVE:
-			Serial.print("RADIO_RXACTIVE");
+		case CT1200_RXACTIVE:
+			Serial.print("CT1200_RXACTIVE");
 			break;
 
-		case RADIO_RXREAD:
-			Serial.print("RADIO_RXREAD");
+		case CT1200_RXREAD:
+			Serial.print("CT1200_RXREAD");
 			break;
 
-		case RADIO_TXSTART:
-			Serial.print("RADIO_TXSTART");
+		case CT1200_TXSTART:
+			Serial.print("CT1200_TXSTART");
 			break;
 
-		case RADIO_TXACTIVE:
-			Serial.print("RADIO_TXACTIVE");
+		case CT1200_TXACTIVE:
+			Serial.print("CT1200_TXACTIVE");
 			break;
 
 		default:
@@ -333,7 +288,6 @@ void CC1200::reset()
 
 boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 {
-	//while(flutterRadioState == RADIO_TXACTIVE); //wait for one packet to finish before sending another
 	if (asleep == true)
 	{
 		return false;
@@ -347,11 +301,11 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 	if (txBytesUsed > 0)
 	{
 		// Make sure that the radio is in IDLE state before flushing the FIFO
-		setState(RADIO_IDLE);
+		setState(CT1200_IDLE);
 		SendStrobe(SFTX); //flush buffer if needed
 	}
 
-	setState(RADIO_FSTX); //spin up frequency synthesizer
+	setState(CC1200_FSTX); //spin up frequency synthesizer
 	byte data[length];
 
 	for (int i = 0; i < length; i++)
@@ -366,7 +320,7 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 	Serial.println(" bytes: ");
 	printBuffer(txBuffer, length);
 #endif
-	setState(RADIO_TX); //spin up frequency synthesizer
+	setState(CT1200_TX); //spin up frequency synthesizer
 	return true;
 }
 
@@ -376,7 +330,8 @@ byte CC1200::getState()
 	return (state);
 }
 
-byte CC1200::setState(byte setState)
+
+CC1200_STATE CC1200::setState(CC1200_STATE setState)
 {
 	byte currentState = getState(); //0 = IDLE, 1 = RX, 2 = TX, 3 = FastTX ready
 	//4 = CALIBRATE (synthesizer is calibrating), 5 = SETTLING, 6 = RX FIFO Error, 7 = TX Fifo Error
@@ -392,18 +347,18 @@ byte CC1200::setState(byte setState)
 
 		switch (currentState)
 		{
-			case RADIO_IDLE:
+			case CT1200_IDLE:
 				switch (setState)
 				{
-					case RADIO_RX:
+					case CT1200_RX:
 						SendStrobe(SRX);
 						break;
 
-					case RADIO_TX:
+					case CT1200_TX:
 						SendStrobe(STX);
 						break;
 
-					case RADIO_FSTX:
+					case CC1200_FSTX:
 						SendStrobe(SFSTXON);
 						break;
 				}
@@ -411,18 +366,18 @@ byte CC1200::setState(byte setState)
 				currentState = getState();
 				break;
 
-			case RADIO_RX:
+			case CT1200_RX:
 				switch (setState)
 				{
-					case RADIO_IDLE:
+					case CT1200_IDLE:
 						SendStrobe(SIDLE);
 						break;
 
-					case RADIO_TX:
+					case CT1200_TX:
 						SendStrobe(STX);
 						break;
 
-					case RADIO_FSTX:
+					case CC1200_FSTX:
 						SendStrobe(SFSTXON);
 						break;
 				}
@@ -430,18 +385,18 @@ byte CC1200::setState(byte setState)
 				currentState = getState();
 				break;
 
-			case RADIO_TX:
+			case CT1200_TX:
 				switch (setState)
 				{
-					case RADIO_IDLE:
+					case CT1200_IDLE:
 						SendStrobe(SIDLE);
 						break;
 
-					case RADIO_RX:
+					case CT1200_RX:
 						SendStrobe(SRX);
 						break;
 
-					case RADIO_FSTX:
+					case CC1200_FSTX:
 						SendStrobe(SFSTXON);
 						break;
 				}
@@ -449,18 +404,18 @@ byte CC1200::setState(byte setState)
 				currentState = getState();
 				break;
 
-			case RADIO_FSTX:
+			case CC1200_FSTX:
 				switch (setState)
 				{
-					case RADIO_IDLE:
+					case CT1200_IDLE:
 						SendStrobe(SIDLE);
 						break;
 
-					case RADIO_TX:
+					case CT1200_TX:
 						SendStrobe(STX);
 						break;
 
-					case RADIO_RX:
+					case CT1200_RX:
 						SendStrobe(SRX);
 						break;
 				}
@@ -468,22 +423,22 @@ byte CC1200::setState(byte setState)
 				currentState = getState();
 				break;
 
-			case RADIO_CALIBRATE:
+			case CC1200_CALIBRATE:
 				delayMicroseconds(50);
 				currentState = getState();
 				break;
 
-			case RADIO_SETTLING:
+			case CC1200_SETTLING:
 				delayMicroseconds(50);
 				currentState = getState();
 				break;
 
-			case RADIO_RXERROR:
+			case CT1200_RXERROR:
 				SendStrobe(SFRX);
 				currentState = getState();
 				break;
 
-			case RADIO_TXERROR:
+			case CT1200_TXERROR:
 				SendStrobe(SFTX);
 				currentState = getState();
 				break;
@@ -940,9 +895,9 @@ byte CC1200::bytesAvailable()
 
 void CC1200::clearRXFIFO()
 {
-	setState(RADIO_IDLE);
+	setState(CT1200_IDLE);
 	SendStrobe(SFRX);
-	setState(RADIO_RX);
+	setState(CT1200_RX);
 #ifdef DEBUG
 	Serial.println("PACKET ERROR, CLEARED RX FIFO");
 #endif
@@ -954,7 +909,7 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 	boolean dataGood = false;
 
 	//Serial.println("Bytes to Read: ");
-// Serial.println(bytesToRead);
+    //Serial.println(bytesToRead);
 
 	if (rxBuffer.bytesAvailable() < bytesToRead)
 	{
@@ -977,9 +932,9 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 		Serial.println("RX FIFO ERR");
 #endif
 		// Flush RX FIFO
-		setState(RADIO_IDLE);
+		setState(CT1200_IDLE);
 		SendStrobe(SFRX);
-		setState(RADIO_RX);
+		setState(CT1200_RX);
 	}
 	else
 	{
@@ -1021,7 +976,60 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 	return dataGood;
 }
 
+/****** Debug member functions **********************************************/
+
+#ifdef DEBUG
+/**
+ * Print a register value for debugging 
+ **/
+void CC1200::printReg(uint16_t reg, String name)
+{
+	byte val = ReadReg(reg);
+	Serial.print("Register ");
+	Serial.print(name);
+	Serial.print(" at address 0x");
+	Serial.print(reg, HEX);
+	Serial.print(" is 0x");
+	Serial.println(val, HEX);
+}
+
+void CC1200::printBuffer(byte *buffer, byte length)
+{
+	for (int i = 0; i < length; i++)
+	{
+		Serial.print("[0x");
+		Serial.print(buffer[i], HEX);
+		Serial.print("]");
+	}
+	Serial.println();
+}  
+
+#endif /* DEBUG */
 
 
+#ifdef RADIOTESTMODE
+void CC1200::txTestMode()
+{
+	//TX test mode settings
+	setState(CT1200_TX); //TX test mode ONLY
 
+	while (1);
+}
 
+void CC1200::rxTestMode()
+{
+	//RX test mode settings
+#define SYNCHRONOUS //comment this out for transparent mode (no timing recovery)
+#ifdef SYNCHRONOUS
+	WriteReg(REG_PREAMBLE_CFG1, 0); //No preamble
+	WriteReg(REG_SYNC_CFG1, 0x0A); //No sync uint16_t
+	WriteReg(REG_PKT_CFG2, 0x1); //Synchronous serial mode
+#else
+	WriteReg(REG_PKT_CFG2, 0x3); //Packet mode = transparent
+	WriteReg(REG_MDMCFG0, 0x45); //Transparent mode on
+#endif
+	WriteReg(REG_MDMCFG1, 0x02); //FIFO OFF
+	WriteReg(REG_IOCFG3, 0x09); //send symbols out pin D18
+}
+#endif /* RADIOTESTMODE */
+ 
