@@ -21,8 +21,10 @@ limitations under the License.
 boolean _running = false;
 Flutter flutter;
 
-#define JOYSTICK1 A0
-#define JOYSTICK2 A2
+#define JOYSTICK1 A2
+#define JOYSTICK2 A1    
+
+boolean beginner = false;
 
 
 void setup()
@@ -68,8 +70,14 @@ void loop()
 		delay(200);
 	}
 
-	byte j1 = analogRead(JOYSTICK1) >> 2;
-	byte j2 = analogRead(JOYSTICK2) >> 2;
+	byte j1 = 255-(analogRead(JOYSTICK1) >> 2);
+	byte j2 = 255-(analogRead(JOYSTICK2) >> 2);
+
+        if(beginner==true)
+        {
+          j2 = (((int)j2)-128)*.25+128;  
+        }
+        
 	byte mydata[3] = {0x64, j1, j2};
 	//send a byte over the radio
 	flutter.sendData(mydata, 3, 2); //legth is 3, 2 is car's address
@@ -89,6 +97,11 @@ void loop()
 	{
 		flutter.setLED(0, j2 - 128, j1);
 	}
+        
+        if(beginner==true)
+        {
+          flutter.setLED(PURPLE);
+        }
 
 	delay(20); //spend some time smelling the roses
 }
@@ -114,6 +127,7 @@ void button1()
 void button2()
 {
 	interrupts();
+        delayMicroseconds(16000);
 	int val = digitalRead(BUTTON2);
 #ifdef FLUTTER_R2
 
@@ -126,7 +140,7 @@ void button2()
 	}
 	else
 	{
-		//_button2=0;
+	  beginner = !beginner;
 	}
 
 // buttonsChanged=true;
@@ -174,6 +188,5 @@ extern boolean tickInterrupt()
 
 	return flutter.tickInt();
 }
-
 
 

@@ -772,7 +772,6 @@ boolean Network::tickInterrupt()
 
 				case TXTIME1:
 					softInterrupt();
-
 				case TXTIME2:
 					softInterrupt();
 					break;
