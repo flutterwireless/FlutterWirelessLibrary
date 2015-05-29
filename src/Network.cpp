@@ -679,7 +679,7 @@ boolean Network::hop()
 		channelIndex = 0;
 	}
 
-	if (address != MASTER_ADDRESS && address == TIMING_CH_INDEX)
+	if (address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX)
 	{
 		networkStatus = SYNC_WAIT;
 	}

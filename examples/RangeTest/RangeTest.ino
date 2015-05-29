@@ -61,6 +61,15 @@ void setup()
 
 void loop()
 {
+
+while(flutter.getState()!=NORMAL_OPERATION) //if we aren't synchronized with another radio, just loop and blink lights.
+		{
+			flutter.setLED(RED);
+			delay(200);
+			flutter.setLED(BLUE);
+			delay(200);
+		}
+
 #ifdef TRANSMITTER
 	mydata++;
 	byte array[3] = {0x63, mydata, 0};
