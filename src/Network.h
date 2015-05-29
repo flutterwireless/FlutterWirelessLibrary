@@ -29,14 +29,22 @@
 #define EU 0 //use this setting for most countries inside the EU. Flutter will operate from 865-868 MHz on 50 pseudorandomly chosen channels
 #define NORTH_AMERICA 1 //use this setting for the US and Canada. Flutter will operate from 902-928 MHz on 50 pseudorandomly chosen channels
 #define US2 2
-#define AUS_NZ 3 //use this setting for the US and Canada. Flutter will operate from 925-928 MHz on 50 pseudorandomly chosen channels
+#define AUS_NZ 3 //use this setting for the Australia and New Zealand. Flutter will operate from 925-928 MHz on 50 pseudorandomly chosen channels
 
 //Frequency Selection
 //WARNING! This setting must be properly set for your region or you will be breaking the law.
 //Falure to properly set this value can result in serious harmful operation.
-//If not properly configured, the device may cause harmful interference to critical emergency services.
-//Use one of the values
-//#define BAND REPLACE_THIS_TEXT_WITH_YOUR_REGION_FROM_ABOVE
+//If not properly configured, the device may cause harmful interference to critical emergency services. DO NOT SET IT TO A REGION OTHER THAN YOUR OWN. It will not improve operation and will cause harm.
+//TO SET YOUR REGION, REMOVE THE LEADING SLASHES ON ONE OF THE FOLLOWING LINES
+//#define BAND EU
+//#define BAND NORTH_AMERICA
+//#define BAND US2
+//#define BAND AUS_NZ
+
+
+#if !defined BAND
+#error " *************** ERROR: No region defined for Flutter. In the Flutter library, in the "src" folder, see line 34 of "Network.h" and set to your region to resolve the issue. This only needs to be done once. ***************"
+#endif
 
 #define FREQ_BANDS {865000000,902000000,915000000,925000000} //hz
 #define NUM_CHANNELS {60,520,260,60} //hz

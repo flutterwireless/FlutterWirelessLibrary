@@ -36,11 +36,7 @@ typedef enum _CC1200_STATE_
 {
     CC1200_IDLE = 0, /// < Radio in standby 
     CC1200_RX, /// 1 transmit ready
-<<<<<<< HEAD
     CC1200_TX,  /// 2 transmitting active
-=======
-    CC1200_TX.  /// 2 transmitting active
->>>>>>> c5d332272ed6c252085512a202e66c8997341900
     CC1200_FSTX, /// 3 fast transmit ready 
     CC1200_CALIBRATE, /// 4 = CALIBRATE (synthesizer is calibrating)
     CC1200_SETTLING,  /// 5 = Radio SETTLING
@@ -81,11 +77,9 @@ class CC1200
 {
 
 public:
-<<<<<<< HEAD
+
 	CC1200_STATE state;
-=======
-	CT1200_STATE state;
->>>>>>> c5d332272ed6c252085512a202e66c8997341900
+
 	volatile byte chipStatus;
 	boolean asleep;
 	
@@ -122,11 +116,8 @@ public:
 
 private:
 	
-<<<<<<< HEAD
+
 	CC1200_STATE setState(CC1200_STATE setState);
-=======
-	CT1200_STATE setState(CC1200_STATE setState);
->>>>>>> c5d332272ed6c252085512a202e66c8997341900
 
 
 	void WriteReg(uint16_t, byte);

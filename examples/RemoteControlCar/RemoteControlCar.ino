@@ -17,7 +17,6 @@ limitations under the License.
 
 #include "Flutter.h"
 
-
 byte myData = 0;
 boolean _running = false;
 Flutter flutter;
@@ -29,7 +28,7 @@ Flutter flutter;
 void setup()
 {
 	Serial.begin(115200);
-	flutter.band = NORTH_AMERICA;
+	flutter.band = BAND;
 	flutter.setNetworkName("Home network");
 	pinMode(STEERINGPIN, OUTPUT);
 	pinMode(THROTTLEPIN, OUTPUT);

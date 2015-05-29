@@ -17,7 +17,6 @@ limitations under the License.
 
 #include "Flutter.h"
 
-
 boolean _running = false;
 Flutter flutter;
 
@@ -30,7 +29,7 @@ byte mydata = 0;
 void setup()
 {
 	Serial.begin(115200);
-	flutter.band = NORTH_AMERICA;
+	flutter.band = BAND;
 	flutter.setNetworkName("Range Test");
 	Serial.println("Initializing...");
 
