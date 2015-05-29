@@ -60,7 +60,11 @@ boolean CC1200::txBytes(byte _bytes)
 	}
 	else
 	{
+<<<<<<< HEAD
 		setState(CC1200_TX); //just TX the preamble forever
+=======
+		setState(CT1200_TX); //just TX the preamble forever
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	}
 }
 
@@ -70,11 +74,19 @@ boolean CC1200::sleep(boolean _sleep)
 
 	if (asleep)
 	{
+<<<<<<< HEAD
 		setState(CC1200_IDLE);
 	}
 	else
 	{
 		setState(CC1200_RX);
+=======
+		setState(CT1200_IDLE);
+	}
+	else
+	{
+		setState(CT1200_RX);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	}
 
 	return true;
@@ -101,7 +113,11 @@ boolean CC1200::init()
 	//printMARC();
 	//readConfigRegs();
 	//SetFrequency(915);
+<<<<<<< HEAD
 	setState(CC1200_RX);
+=======
+	setState(CT1200_RX);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	//rxTestMode();
 	//txTestMode();
 	return true;
@@ -118,7 +134,11 @@ void CC1200::setAddress(byte address)
 boolean CC1200::SetFrequency(uint32_t frequency)
 {
 	//digitalWrite(8,HIGH);
+<<<<<<< HEAD
 	setState(CC1200_IDLE);
+=======
+	setState(CT1200_IDLE);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	SendStrobe(SFRX);
 	int freq = 0.0065536f * frequency; //magic number comes from simplification of calculations from the datasheet with 40MHz crystal and LO Divider of 4.
 	byte f0 = 0xFF & freq;
@@ -137,7 +157,11 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 	WriteReg(REG_FREQ0, f0);
 	WriteReg(REG_FREQ1, f1);
 	WriteReg(REG_FREQ2, f2);
+<<<<<<< HEAD
 	setState(CC1200_RX);
+=======
+	setState(CT1200_RX);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 
 	if (ReadReg(REG_FREQ0) == f0 && ReadReg(REG_FREQ1) == f1 && ReadReg(REG_FREQ2) == f2)
 	{
@@ -234,6 +258,7 @@ void CC1200::printRadioState(byte state)
 {
 	switch (state)
 	{
+<<<<<<< HEAD
 		case CC1200_IDLE:
 			Serial.print("CC1200_IDLE");
 			break;
@@ -256,6 +281,30 @@ void CC1200::printRadioState(byte state)
 
 		case CC1200_TXACTIVE:
 			Serial.print("CC1200_TXACTIVE");
+=======
+		case CT1200_IDLE:
+			Serial.print("CT1200_IDLE");
+			break;
+
+		case CT1200_RXWAIT:
+			Serial.print("CT1200_RXWAIT");
+			break;
+
+		case CT1200_RXACTIVE:
+			Serial.print("CT1200_RXACTIVE");
+			break;
+
+		case CT1200_RXREAD:
+			Serial.print("CT1200_RXREAD");
+			break;
+
+		case CT1200_TXSTART:
+			Serial.print("CT1200_TXSTART");
+			break;
+
+		case CT1200_TXACTIVE:
+			Serial.print("CT1200_TXACTIVE");
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 			break;
 
 		default:
@@ -301,7 +350,11 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 	if (txBytesUsed > 0)
 	{
 		// Make sure that the radio is in IDLE state before flushing the FIFO
+<<<<<<< HEAD
 		setState(CC1200_IDLE);
+=======
+		setState(CT1200_IDLE);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 		SendStrobe(SFTX); //flush buffer if needed
 	}
 
@@ -320,7 +373,11 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 	Serial.println(" bytes: ");
 	printBuffer(txBuffer, length);
 #endif
+<<<<<<< HEAD
 	setState(CC1200_TX); //spin up frequency synthesizer
+=======
+	setState(CT1200_TX); //spin up frequency synthesizer
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	return true;
 }
 
@@ -347,6 +404,7 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 
 		switch (currentState)
 		{
+<<<<<<< HEAD
 			case CC1200_IDLE:
 				switch (setState)
 				{
@@ -355,6 +413,16 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_TX:
+=======
+			case CT1200_IDLE:
+				switch (setState)
+				{
+					case CT1200_RX:
+						SendStrobe(SRX);
+						break;
+
+					case CT1200_TX:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 						SendStrobe(STX);
 						break;
 
@@ -366,6 +434,7 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 				currentState = getState();
 				break;
 
+<<<<<<< HEAD
 			case CC1200_RX:
 				switch (setState)
 				{
@@ -374,6 +443,16 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_TX:
+=======
+			case CT1200_RX:
+				switch (setState)
+				{
+					case CT1200_IDLE:
+						SendStrobe(SIDLE);
+						break;
+
+					case CT1200_TX:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 						SendStrobe(STX);
 						break;
 
@@ -385,6 +464,7 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 				currentState = getState();
 				break;
 
+<<<<<<< HEAD
 			case CC1200_TX:
 				switch (setState)
 				{
@@ -393,6 +473,16 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_RX:
+=======
+			case CT1200_TX:
+				switch (setState)
+				{
+					case CT1200_IDLE:
+						SendStrobe(SIDLE);
+						break;
+
+					case CT1200_RX:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 						SendStrobe(SRX);
 						break;
 
@@ -407,6 +497,7 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 			case CC1200_FSTX:
 				switch (setState)
 				{
+<<<<<<< HEAD
 					case CC1200_IDLE:
 						SendStrobe(SIDLE);
 						break;
@@ -416,6 +507,17 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_RX:
+=======
+					case CT1200_IDLE:
+						SendStrobe(SIDLE);
+						break;
+
+					case CT1200_TX:
+						SendStrobe(STX);
+						break;
+
+					case CT1200_RX:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 						SendStrobe(SRX);
 						break;
 				}
@@ -433,12 +535,20 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 				currentState = getState();
 				break;
 
+<<<<<<< HEAD
 			case CC1200_RXERROR:
+=======
+			case CT1200_RXERROR:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 				SendStrobe(SFRX);
 				currentState = getState();
 				break;
 
+<<<<<<< HEAD
 			case CC1200_TXERROR:
+=======
+			case CT1200_TXERROR:
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 				SendStrobe(SFTX);
 				currentState = getState();
 				break;
@@ -895,9 +1005,15 @@ byte CC1200::bytesAvailable()
 
 void CC1200::clearRXFIFO()
 {
+<<<<<<< HEAD
 	setState(CC1200_IDLE);
 	SendStrobe(SFRX);
 	setState(CC1200_RX);
+=======
+	setState(CT1200_IDLE);
+	SendStrobe(SFRX);
+	setState(CT1200_RX);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 #ifdef DEBUG
 	Serial.println("PACKET ERROR, CLEARED RX FIFO");
 #endif
@@ -932,9 +1048,15 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 		Serial.println("RX FIFO ERR");
 #endif
 		// Flush RX FIFO
+<<<<<<< HEAD
 		setState(CC1200_IDLE);
 		SendStrobe(SFRX);
 		setState(CC1200_RX);
+=======
+		setState(CT1200_IDLE);
+		SendStrobe(SFRX);
+		setState(CT1200_RX);
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 	}
 	else
 	{
@@ -1011,7 +1133,11 @@ void CC1200::printBuffer(byte *buffer, byte length)
 void CC1200::txTestMode()
 {
 	//TX test mode settings
+<<<<<<< HEAD
 	setState(CC1200_TX); //TX test mode ONLY
+=======
+	setState(CT1200_TX); //TX test mode ONLY
+>>>>>>> c5d332272ed6c252085512a202e66c8997341900
 
 	while (1);
 }
