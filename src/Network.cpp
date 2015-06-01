@@ -27,6 +27,7 @@ volatile bool hopNow = false;
 volatile bool updateSysTick = false;
 static const uint32_t bands[] = FREQ_BANDS;
 static const uint32_t numChannels[] = NUM_CHANNELS;
+volatile int syncError = 0;
 
 volatile int pin = 6;
 
@@ -112,7 +113,6 @@ void Network::connect(uint16_t devices)
 		else
 		{
 			networkStatus = SYNC_WAIT;
-			//networkStatus=NORMAL_OPERATION; //TODO: This is a hack. Please remove when Sync Wait mode is working.
 		}
 
 		//printChannelList();
@@ -518,6 +518,7 @@ void Network::syncTime(byte packetLength)
 // byte txData[6] = { (byte)((micros()%1000)/4),(byte)(((time.millis%1000)>>2) & 0xFF) ,(byte)((time.millis%1000<<6) & 0xC0) | (time.seconds>>24 & 0x3F) ,(byte)(time.seconds>>16 & 0xFF) ,(byte)(time.seconds>>8 & 0xFF) ,(byte)(time.seconds & 0xFF)};
 	timeType temp;
 	networkStatus = NORMAL_OPERATION;
+	syncError=0;
 	int16_t sentMicros = ((int16_t)rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 5]) * 4;
 	int32_t sentMillis = ((int32_t)rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 6]) << 2 | ((int32_t)(rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 7]) >> 6);
 	int32_t sentSeconds = ((int32_t)(rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 7]) & 0x3F) << 24 | ((int32_t)rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 8]) << 16 | ((int32_t)rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 9]) << 8 | rxBuffer.array[rxBuffer.bytesEnd() - packetLength + 10];
@@ -681,7 +682,15 @@ boolean Network::hop()
 
 	if (address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX)
 	{
-		networkStatus = SYNC_WAIT;
+		syncError++; //in normal operation, this will get reset to zero shortly after this line, when a timing packet arrives. We will check this next hop to see if timing did arrive.
+	}
+	if(address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX+1)
+	{
+		if(syncError>=2)
+		{
+			networkStatus = SYNC_WAIT;
+		}
+		
 	}
 
 #ifdef DEBUG1

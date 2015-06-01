@@ -58,14 +58,20 @@ void setup()
 
 void loop()
 {
-	/*	while(flutter.getState()!=NORMAL_OPERATION) //if we aren't synchronized with another radio, just loop and blink lights.
+		if(flutter.getState()!=NORMAL_OPERATION) //if we aren't synchronized with another radio, just loop and blink lights.
 		{
-			flutter.setLED(RED);
-			delay(200);
-			flutter.setLED(BLUE);
-			delay(200);
+			if(millis()%400<200)
+			{
+				flutter.setLED(RED);
+			}
+			
+			else
+			{
+				flutter.setLED(BLUE);
+			}
+			
 		}
-	*/
+	
 
 	//read the radio to see if there is data available
 	if (flutter.dataAvailable() > 0)

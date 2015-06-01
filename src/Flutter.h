@@ -79,6 +79,7 @@ typedef enum _RADIO_STATE_
 //test and debugging
 
 //#define DEBUG
+//#define DEBUG_TIME
 //#define RADIOTESTMODE
 //#define PIN_DEBUG
 
