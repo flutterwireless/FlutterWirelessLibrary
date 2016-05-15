@@ -19,7 +19,6 @@
 
 #include "Flutter.h"
 
-
 Network network;
 
 
@@ -131,7 +130,6 @@ void Flutter::setAddress(int address)
 	network.setAddress(address);
 }
 
-
 byte Flutter::sendData(byte data, byte address)
 {
 	return network.queueDataPacket(CMD_USER_ARRAY, (byte*)data, 1, address);
@@ -147,30 +145,25 @@ byte Flutter::next()
 	return 0;
 }
 
+void Flutter::getRSSIArray(volatile uint8_t (*array)[3][10])
+{
+	network.getRSSIArray(array);
+}
+
+int16_t Flutter::getTimingIndex()
+{
+	return network.getTimingIndex();
+}
+
 int Flutter::packetRSSI(byte *array, int packetSize)
 {
-	int val = array[packetSize - 2];
-	int dbm = 0;
-
-	if (val >= 128)
-	{
-		dbm = 128 - val;
-	}
-	else
-	{
-		dbm = val;
-	}
-
-	dbm = dbm - RSSI_OFFSET;
-	return dbm;
+	return Helper::calculateRSSI(array[packetSize - 2]);
 }
-/*
-int Flutter::getRSSI()
+
+int32_t Flutter::getRSSI()
 {
-  byte val = radio.readRSSI();
-  return(getRSSI(val));
+	return network.getRSSI();
 }
-*/
 
 void Flutter::setLED(int red, int green, int blue)
 {
@@ -220,6 +213,25 @@ void Flutter::resume()
 	network.paused = false;
 }
 
+void Flutter::setFrequencyAdjustment(int32_t adjustment)
+{
+	network.frequency_adjustment = adjustment;
+}
+
+int32_t Flutter::getFrequencyAdjustment()
+{
+	return network.frequency_adjustment;
+}
+
+void Flutter::enterTestMode()
+{
+	network.enterTestMode();
+}
+
+void Flutter::setChannel(int channel)
+{
+	network.setChannel(channel);
+}
 
 int Flutter::interrupt()
 {
@@ -233,5 +245,3 @@ boolean Flutter::tickInt()
 {
 	return network.tickInterrupt();
 }
-
-

@@ -38,7 +38,7 @@ CC1200::CC1200()
 	asleep = false;
 }
 
-
+// tx random data, or just tx the preamble if _bytes = 0
 boolean CC1200::txBytes(byte _bytes)
 {
 	if (asleep == true)
@@ -124,15 +124,16 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 	byte f0 = 0xFF & freq;
 	byte f1 = (freq & 0xFF00) >> 8;
 	byte f2 = (freq & 0xFF0000) >> 16;
+//#define DEBUG_FREQUENCY
 #ifdef DEBUG_FREQUENCY
-	Serial.print("Programming Frequency ");
-	Serial.print(frequency);
-	Serial.print(" MHz. Registers 0, 1, and 2 are 0x");
-	Serial.print(f0, HEX);
-	Serial.print(" 0x");
-	Serial.print(f1, HEX);
-	Serial.print(" 0x");
-	Serial.println(f2, HEX);
+	SerialUSB.print("Programming Frequency ");
+	SerialUSB.print(frequency);
+	SerialUSB.print(" MHz. Registers 0, 1, and 2 are 0x");
+	SerialUSB.print(f0, HEX);
+	SerialUSB.print(" 0x");
+	SerialUSB.print(f1, HEX);
+	SerialUSB.print(" 0x");
+	SerialUSB.println(f2, HEX);
 #endif
 	WriteReg(REG_FREQ0, f0);
 	WriteReg(REG_FREQ1, f1);
@@ -265,9 +266,14 @@ void CC1200::printRadioState(byte state)
 #endif
 
 
-byte CC1200::readRSSI()
+int8_t CC1200::readRSSI()
 {
 	return ReadReg(REG_RSSI1);
+}
+
+int32_t CC1200::getRSSI()
+{
+	return Helper::calculateRSSI(readRSSI());
 }
 
 
@@ -980,7 +986,7 @@ boolean CC1200::readRX(Queue& rxBuffer, byte bytesToRead)
 
 #ifdef DEBUG
 /**
- * Print a register value for debugging 
+ * Print a register value for debugging
  **/
 void CC1200::printReg(uint16_t reg, String name)
 {
@@ -1002,7 +1008,7 @@ void CC1200::printBuffer(byte *buffer, byte length)
 		Serial.print("]");
 	}
 	Serial.println();
-}  
+}
 
 #endif /* DEBUG */
 
@@ -1032,4 +1038,3 @@ void CC1200::rxTestMode()
 	WriteReg(REG_IOCFG3, 0x09); //send symbols out pin D18
 }
 #endif /* RADIOTESTMODE */
- 

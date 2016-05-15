@@ -25,6 +25,7 @@
 #include "Network.h"
 #include "Reset.h"
 #include "Queue.h"
+#include "Helper.h"
 //#include "SPI.h"
 
 
@@ -36,13 +37,13 @@
 //radio states
 typedef enum _RADIO_STATE_
 {
-    RADIO_STATE_IDLE = 0, 
-    RADIO_STATE_RXIDLE, 
-    RADIO_STATE_RXACTIVE,  
+    RADIO_STATE_IDLE = 0,
+    RADIO_STATE_RXIDLE,
+    RADIO_STATE_RXACTIVE,
     RADIO_STATE_TXPENDING, //aka TXWAIT
     RADIO_STATE_TXACTIVE, ///(5)
-    RADIO_STATE_TXFAILED, 
-    RADIO_STATE_TXSUCCEEDED, 
+    RADIO_STATE_TXFAILED,
+    RADIO_STATE_TXSUCCEEDED,
 } RADIO_STATE;
 
 #warning DEPRECATED. Move to enum please, these will be removed soon
@@ -71,9 +72,6 @@ typedef enum _RADIO_STATE_
 #else
 #define GDO0_PIN 17
 #endif
-
-
-#define RSSI_OFFSET 81
 
 
 //test and debugging
@@ -119,6 +117,15 @@ public:
 	int packetRSSI(byte *array, int packetSize);
 	void pause();
 	void resume();
+  void enterTestMode();
+  void setChannel(int channel);
+
+  void setFrequencyAdjustment(int32_t adjustment);
+  int32_t getFrequencyAdjustment();
+
+  int32_t getRSSI();
+  void getRSSIArray(volatile uint8_t (*array)[3][10]);
+  int16_t getTimingIndex();
 
 private:
 	void setRadioPins();
@@ -128,4 +135,3 @@ private:
 
 
 #endif
-

@@ -61,6 +61,11 @@ boolean Radio::readRX(Queue& rxBuffer, byte bytesToRead)
 	return ccradio.readRX(rxBuffer, bytesToRead);
 }
 
+boolean Radio::txBytes(byte _bytes)
+{
+	return ccradio.txBytes(_bytes);
+}
+
 void Radio::setAddress(byte address)
 {
 	ccradio.setAddress(address);
@@ -69,4 +74,9 @@ void Radio::setAddress(byte address)
 void Radio::clearRXFIFO()
 {
 	ccradio.clearRXFIFO();
+}
+
+int32_t Radio::getRSSI()
+{
+	return ccradio.getRSSI();
 }

@@ -27,17 +27,16 @@
 #include "CC1200_Flutter_reg_config_915mhz_20ksps_GFSK_12_5khz.h"
 //#include "CC1200_Flutter_reg_config_915mhz_1ksps.h"
 //#include "CC1200_Flutter_reg_config_915mhz_1000ksps.h"
-
 #include <SPI.h>
 #include "Queue.h"
 
 //radio states from chip status byte
 typedef enum _CC1200_STATE_
 {
-    CC1200_IDLE = 0, /// < Radio in standby 
+    CC1200_IDLE = 0, /// < Radio in standby
     CC1200_RX, /// 1 transmit ready
     CC1200_TX,  /// 2 transmitting active
-    CC1200_FSTX, /// 3 fast transmit ready 
+    CC1200_FSTX, /// 3 fast transmit ready
     CC1200_CALIBRATE, /// 4 = CALIBRATE (synthesizer is calibrating)
     CC1200_SETTLING,  /// 5 = Radio SETTLING
     CC1200_RXERROR,   /// 6 = RX FIFO Error
@@ -82,9 +81,9 @@ public:
 
 	volatile byte chipStatus;
 	boolean asleep;
-	
+
 	CC1200();
-	
+
 	//void setLED(byte red, byte green, byte blue);
 
 
@@ -99,7 +98,7 @@ public:
 	boolean transmit(byte data[], byte start, byte length);
 	boolean readRX(Queue& rxBuffer, byte bytesToRead);
 	byte bytesAvailable();
-	byte readRSSI();
+  int32_t getRSSI();
 
 	boolean sleep(boolean _sleep);
 
@@ -115,10 +114,11 @@ public:
 	void clearRXFIFO();
 
 private:
-	
+
 
 	CC1200_STATE setState(CC1200_STATE setState);
 
+	int8_t readRSSI();
 
 	void WriteReg(uint16_t, byte);
 	byte ReadReg(uint16_t);
@@ -153,7 +153,7 @@ private:
     void rxTestMode();
 	void txTestMode();
 #endif /*RADIOTESTMODE*/
-  
+
 
 };
 

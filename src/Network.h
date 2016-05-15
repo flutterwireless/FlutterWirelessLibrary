@@ -37,7 +37,7 @@
 //If not properly configured, the device may cause harmful interference to critical emergency services. DO NOT SET IT TO A REGION OTHER THAN YOUR OWN. It will not improve operation and will cause harm.
 //***** TO SET YOUR REGION, REMOVE THE LEADING SLASHES ON ONE OF THE FOLLOWING LINES *****//
 //#define BAND EU
-//#define BAND NORTH_AMERICA
+#define BAND NORTH_AMERICA
 //#define BAND US2
 //#define BAND AUS_NZ
 
@@ -60,6 +60,7 @@
 #define ORPHAN_WAIT 2
 #define SYNC_WAIT 3
 #define NORMAL_OPERATION 4
+#define TEST_MODE 5
 
 #define BASE_CHANNEL 0
 
@@ -75,9 +76,6 @@
 #define RX_PACKET_QUEUE_SIZE 5
 #define QUEUE_TX 1
 #define QUEUE_RX 2
-
-//shifts all channels up or down by FREQ_ADJ Hz.
-#define FREQ_ADJ 0
 
 //tasks
 #define NO_TASK 0
@@ -106,11 +104,12 @@ typedef struct
 } timeType;
 
 
+
 class Network
 {
 public:
 	Network();
-	boolean init(byte _band);
+	boolean init(uint8_t _band);
 	volatile byte address;
 	volatile byte band;
 	uint16_t channelIndex;
@@ -124,11 +123,15 @@ public:
 	volatile boolean rxPending;
 	boolean synchronized;
 	boolean paused;
+	int32_t frequency_adjustment;
+	void enterTestMode();
 	// byte txBuffer[BUFFER_SIZE];
 	// byte rxBuffer[BUFFER_SIZE];
 
 	// byte txBufferIndex;
 	// byte rxBufferIndex;
+	void getRSSIArray(volatile uint8_t (*array)[3][10]);
+	int16_t getTimingIndex();
 
 	boolean asleep;
 	volatile boolean txBlocked;
@@ -155,6 +158,8 @@ public:
 	int nextPacket();
 	int nextPacketLength();
 
+	int32_t getRSSI();
+
 private:
 
 
@@ -162,7 +167,7 @@ private:
 
 	void pinDebug(int pin, int value);
 
-
+	int16_t calculateFrequencyOffset(int16_t index);
 
 	byte queuedTXCommands;
 	byte commandQueueTX[COMMAND_QUEUE_SIZE][3];

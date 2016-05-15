@@ -18,43 +18,20 @@
 */
 
 
-#ifndef Radio_h
-#define Radio_h
+#include "Helper.h"
 
-#include "CC1200.h"
-#include "Flutter.h"
-#include "Queue.h"
-
-
-
-
-class Radio
+namespace Helper
 {
-public:
-	Radio();
-	boolean init();
 
-	boolean enabled;
-	boolean awake;
-	uint32_t baseFrequency;
-	boolean setFrequency(uint32_t frequency);
-	void setAddress(byte address);
+  int32_t calculateRSSI(int8_t rssiByte)
+  {
+    int dbm = rssiByte;
+    if (dbm == -128)
+    {
+      return -200;
+    }
+    dbm = dbm - RSSI_OFFSET;
+    return dbm;
+  }
 
-	byte bytesAvailable();
-	boolean readRX(Queue& rxBuffer, byte bytesToRead);
-	boolean txBytes(byte _bytes);
-
-	boolean enable();
-	boolean transmit(byte *data, byte start, byte length);
-	boolean transmit(byte *data, byte length);
-	void clearRXFIFO();
-	int32_t getRSSI();
-
-private:
-
-
-
-};
-
-
-#endif
+}
