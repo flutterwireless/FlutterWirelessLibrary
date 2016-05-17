@@ -130,8 +130,6 @@ public:
 
 	// byte txBufferIndex;
 	// byte rxBufferIndex;
-	void getRSSIArray(volatile uint8_t (*array)[3][10]);
-	int16_t getTimingIndex();
 
 	boolean asleep;
 	volatile boolean txBlocked;

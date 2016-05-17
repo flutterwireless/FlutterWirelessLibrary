@@ -124,8 +124,6 @@ public:
   int32_t getFrequencyAdjustment();
 
   int32_t getRSSI();
-  void getRSSIArray(volatile uint8_t (*array)[3][10]);
-  int16_t getTimingIndex();
 
 private:
 	void setRadioPins();

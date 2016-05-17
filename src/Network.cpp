@@ -37,14 +37,6 @@ volatile int pin = 6;
 #define TIMING_ADJUST 6900-3320 //us to add for timing adjustment
 //#define TIMING_ADJUST -4000 //us to add for timing adjustment
 
-volatile int16_t timing_index = 0;
-volatile int16_t timing_center = 0;
-volatile int16_t timing_counter = 0;
-volatile int16_t timing_samples = 0;
-
-volatile uint8_t RSSI_BY_INDEX[3][10];
-
-
 //Constructor
 Network::Network()
 {
@@ -93,14 +85,6 @@ void Network::enterTestMode()
 boolean Network::init(uint8_t _band) //intialize radio. we could also call this "Reset"?
 {
 	band = _band;
-
-	for(int i =0; i<3; i++)
-	{
-		for(int j =0; j<10; j++)
-		{
-			RSSI_BY_INDEX[i][j] = 0;
-		}
-	}
 
 	if (!radio.enabled)
 	{
@@ -236,75 +220,11 @@ boolean Network::setChannel(uint32_t _channel)
 		return false;
 	}
 
-
-	if (channelIndex == TIMING_CH_INDEX && address != MASTER_ADDRESS && radioState != RXACTIVE)
-	{
-		if(networkStatus!=NORMAL_OPERATION)
-		{
-			timing_index = random(-5, 6);
-		} else if(timing_samples>50)
-		{
-			timing_index = calculateFrequencyOffset(timing_index);
-			timing_samples=0;
-			if(timing_index > 5) timing_index = 5;
-			if(timing_index < -5) timing_index = -5;
-			for(int i =0; i<3; i++)
-			{
-				for(int j =0; j<10; j++)
-				{
-					RSSI_BY_INDEX[i][j]=-200;
-				}
-			}
-		}
-	} else if(networkStatus == NORMAL_OPERATION && address != MASTER_ADDRESS && radioState != RXACTIVE)
-	{
-		timing_counter++;
-		if(timing_counter>1) timing_counter=-1;
-	}
-	//timing_index++;
-//	if(timing_index>9) timing_index=0;
-
-	//timing_index=7;
-
+	//if (channelIndex == TIMING_CH_INDEX && address != MASTER_ADDRESS && radioState != RXACTIVE)
+//	{
 	channel = _channel;
-	return radio.setFrequency(bands[band] + (CHANNEL_SPACE / 2) + (int32_t)_channel * CHANNEL_SPACE + frequency_adjustment + (timing_index+timing_counter)*5000);
+	return radio.setFrequency(bands[band] + (CHANNEL_SPACE / 2) + (int32_t)_channel * CHANNEL_SPACE + frequency_adjustment);
 
-}
-
-int16_t Network::calculateFrequencyOffset(int16_t index)
-{
-	int sum = 0;
-	int best_sum = -1000;
-	int best_index = 0;
-	int RSSIVAL = 0;
-	for(int i =0; i<3; i++)
-	{
-			sum=0;
-			for(int j =0; j<10; j++)
-			{
-				 RSSIVAL = RSSI_BY_INDEX[i][j];
-				 if (RSSIVAL == -128)
-				 {
-				 	RSSIVAL= -200;
-				 }else
-				 {
-					 RSSIVAL = RSSIVAL - RSSI_OFFSET;
-				 }
-					 sum+=RSSIVAL;
-			}
-			if(sum>best_sum)
-			{
-				best_sum=sum;
-				best_index=i;
-			}
-		}
-
-		return index + best_index-1;
-}
-
-int16_t Network::getTimingIndex()
-{
-	return timing_index+timing_counter;
 }
 
 boolean Network::setChannelByIndex(uint32_t _channel_index)
@@ -312,17 +232,6 @@ boolean Network::setChannelByIndex(uint32_t _channel_index)
 	channel = channelList[_channel_index];
 	channelIndex = _channel_index;
 	return setChannel(channel);
-}
-
-void Network::getRSSIArray(volatile uint8_t (*array)[3][10])
-{
-	for(int i =0; i<3; i++)
-	{
-		for(int j =0; j<10; j++)
-		{
-			(*array)[i][j] =	RSSI_BY_INDEX[i][j];
-		}
-	}
 }
 
 void Network::printTime()
@@ -576,14 +485,6 @@ byte Network::processRXPacket(byte packetLength)
 	Serial.print("Command Byte. 0x");
 	Serial.println(command, HEX);
 #endif
-
-	//save RSSI data for timing index
-	for(int i = 9; i>0; i--)
-	{
-		RSSI_BY_INDEX[timing_counter+1][i]=RSSI_BY_INDEX[timing_counter+1][i-1];
-	}
-	RSSI_BY_INDEX[timing_counter+1][0] = rxBuffer.array[rxBuffer.bytesEnd()-2];
-	timing_samples++;
 
 	switch (command)
 	{

@@ -145,16 +145,6 @@ byte Flutter::next()
 	return 0;
 }
 
-void Flutter::getRSSIArray(volatile uint8_t (*array)[3][10])
-{
-	network.getRSSIArray(array);
-}
-
-int16_t Flutter::getTimingIndex()
-{
-	return network.getTimingIndex();
-}
-
 int Flutter::packetRSSI(byte *array, int packetSize)
 {
 	return Helper::calculateRSSI(array[packetSize - 2]);
