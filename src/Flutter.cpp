@@ -57,6 +57,12 @@ int Flutter::dataAvailable()
 	return network.dataAvailable();
 }
 
+boolean Flutter::sleep(boolean sleep)
+{
+	return network.sleep(sleep);
+}
+
+
 int Flutter::nextPacket()
 {
 	return network.nextPacket();

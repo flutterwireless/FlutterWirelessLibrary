@@ -101,6 +101,7 @@ public:
 
 	void setNetworkName(String name);
 	void setAddress(int address);
+	boolean sleep(boolean sleep);
 
 	int interrupt();
 	boolean processSoftInt();

@@ -132,6 +132,7 @@ public:
 	// byte rxBufferIndex;
 
 	boolean asleep;
+	boolean sleep(boolean sleep);
 	volatile boolean txBlocked;
 
 	void setAddress(int _address);

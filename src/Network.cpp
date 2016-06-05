@@ -74,6 +74,11 @@ void Network::setAddress(int _address)
 	radio.setAddress(address);
 }
 
+boolean Network::sleep(boolean sleep)
+{
+	return radio.sleep(sleep);
+}
+
 
 void Network::enterTestMode()
 {

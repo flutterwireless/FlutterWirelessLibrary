@@ -39,6 +39,7 @@ public:
 	uint32_t baseFrequency;
 	boolean setFrequency(uint32_t frequency);
 	void setAddress(byte address);
+	boolean sleep(boolean sleep);
 
 	byte bytesAvailable();
 	boolean readRX(Queue& rxBuffer, byte bytesToRead);

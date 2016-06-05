@@ -35,6 +35,11 @@ boolean Radio::init()
 	return ccradio.init();
 }
 
+boolean Radio::sleep(boolean sleep)
+{
+	return ccradio.sleep(sleep);
+}
+
 
 boolean Radio::setFrequency(uint32_t frequency)
 {
