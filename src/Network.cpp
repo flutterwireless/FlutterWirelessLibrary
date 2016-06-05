@@ -708,6 +708,7 @@ boolean Network::hop()
 	{
 		syncError++; //in normal operation, this will get reset to zero shortly after this line, when a timing packet arrives. We will check this next hop to see if timing did arrive.
 	}
+	
 	if(address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX+1)
 	{
 		if(syncError>=2)
