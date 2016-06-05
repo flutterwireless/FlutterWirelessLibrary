@@ -693,16 +693,15 @@ boolean Network::hop()
 	//channel = (time.micros*200)/1000000;
 	if (channelIndex == TIMING_CH_INDEX && networkStatus != NORMAL_OPERATION && address != MASTER_ADDRESS)
 	{
-		//return false; //don't hop if sync not recieved
-	}else
-	{
-		pinDebug(7, HIGH);
-		channelIndex++;
+		return false; //don't hop if sync not recieved
+	}
 
-		if (channelIndex >= 50)
-		{
-			channelIndex = 0;
-		}
+	pinDebug(7, HIGH);
+	channelIndex++;
+
+	if (channelIndex >= 50)
+	{
+		channelIndex = 0;
 	}
 
 	if (address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX)
@@ -715,7 +714,6 @@ boolean Network::hop()
 		{
 			networkStatus = SYNC_WAIT;
 		}
-
 	}
 
 #ifdef DEBUG1
