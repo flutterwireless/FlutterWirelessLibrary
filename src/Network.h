@@ -109,7 +109,7 @@ class Network
 {
 public:
 	Network();
-	boolean init(uint8_t _band);
+	boolean init(uint8_t _band, int32_t calibration);
 	volatile byte address;
 	volatile byte band;
 	uint16_t channelIndex;
@@ -124,6 +124,7 @@ public:
 	boolean synchronized;
 	boolean paused;
 	int32_t frequency_adjustment;
+	int32_t frequency_calibration;
 	void enterTestMode();
 	// byte txBuffer[BUFFER_SIZE];
 	// byte rxBuffer[BUFFER_SIZE];

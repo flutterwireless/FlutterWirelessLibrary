@@ -34,4 +34,29 @@ namespace Helper
     return dbm;
   }
 
+  void dumpString(uint32_t startAddr, byte array[], uint32_t nBytes)
+  {
+
+    extEEPROM eep(kbits_32, 1, 32, 0x50);
+
+      uint32_t nRows = (nBytes + 15) >> 4;
+
+      uint8_t d[16];
+      for (uint32_t r = 0; r < nRows; r++) {
+          uint32_t a = startAddr + 16 * r;
+          eep.read(a, d, 16);
+
+          for ( int c = 0; c < 16; c++ ) {
+
+            uint16_t index = c+16*r;
+            if(index<nBytes)
+            {
+              array[index]=d[c];
+            }
+          }
+
+
+      }
+  }
+
 }

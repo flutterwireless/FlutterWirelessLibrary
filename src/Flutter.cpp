@@ -38,13 +38,33 @@ Flutter::Flutter()
 
 boolean Flutter::init()
 {
-	initialized = network.init(band);
+	int32_t cal = readCalibration();
+	initialized = network.init(band, (int32_t)cal);
 	return initialized;
 }
 
 void Flutter::connect(uint16_t devices)
 {
 	network.connect(devices);
+}
+
+int Flutter::readCalibration()
+{
+	byte toRead[1];
+	Helper::dumpString(0, toRead, 1);
+	int32_t cal = 0;
+
+	if(toRead[0]=='F') //lazy way of checking if calibration was written.
+	{
+		int length = 7;
+		byte toRead2[length];
+		Helper::dumpString(30, toRead2, length);
+
+		cal = atoi((char*)toRead2);
+		SerialUSB.print("Cal value is: ");
+		SerialUSB.println(cal);
+	}
+	return cal;
 }
 
 int Flutter::getState()

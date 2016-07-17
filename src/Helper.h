@@ -22,12 +22,16 @@
 #define Helper_h
 
 #include "Arduino.h"
+#include <extEEPROM.h>    //http://github.com/JChristensen/extEEPROM/tree/dev
+#include <Streaming.h>    //http://arduiniana.org/libraries/streaming/
+#include "Wire.h"
 
 #define RSSI_OFFSET 81
 
 namespace Helper
 {
 	int32_t calculateRSSI(int8_t rssiByte);
+	void dumpString(uint32_t startAddr, byte array[], uint32_t nBytes);
 }
 
 #endif

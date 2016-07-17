@@ -59,6 +59,7 @@ Network::Network()
 	time.seconds = 0;
 	paused = false;
 	frequency_adjustment = 0;
+	frequency_calibration = 0;
 }
 
 //configuration functions
@@ -87,9 +88,11 @@ void Network::enterTestMode()
 
 //initialization
 
-boolean Network::init(uint8_t _band) //intialize radio. we could also call this "Reset"?
+boolean Network::init(uint8_t _band, int32_t calibration) //intialize radio.
 {
 	band = _band;
+
+	frequency_calibration = calibration;
 
 	if (!radio.enabled)
 	{
@@ -228,7 +231,7 @@ boolean Network::setChannel(uint32_t _channel)
 	//if (channelIndex == TIMING_CH_INDEX && address != MASTER_ADDRESS && radioState != RXACTIVE)
 //	{
 	channel = _channel;
-	return radio.setFrequency(bands[band] + (CHANNEL_SPACE / 2) + (int32_t)_channel * CHANNEL_SPACE + frequency_adjustment);
+	return radio.setFrequency(bands[band] + (CHANNEL_SPACE / 2) + (int32_t)_channel * CHANNEL_SPACE + frequency_adjustment + frequency_calibration);
 
 }
 
@@ -708,12 +711,13 @@ boolean Network::hop()
 	{
 		syncError++; //in normal operation, this will get reset to zero shortly after this line, when a timing packet arrives. We will check this next hop to see if timing did arrive.
 	}
-	
+
 	if(address != MASTER_ADDRESS && channelIndex == TIMING_CH_INDEX+1)
 	{
 		if(syncError>=2)
 		{
 			networkStatus = SYNC_WAIT;
+		  channelIndex = TIMING_CH_INDEX;
 		}
 	}
 

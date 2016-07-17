@@ -125,6 +125,7 @@ public:
   int32_t getFrequencyAdjustment();
 
   int32_t getRSSI();
+  int readCalibration();
 
 private:
 	void setRadioPins();
