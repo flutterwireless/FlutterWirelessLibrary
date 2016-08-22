@@ -51,18 +51,18 @@ void Flutter::connect(uint16_t devices)
 int Flutter::readCalibration()
 {
 	byte toRead[1];
-	Helper::dumpString(0, toRead, 1);
+	Helper::dumpString(32/8*1024-80, toRead, 1);
 	int32_t cal = 0;
 
 	if(toRead[0]=='F') //lazy way of checking if calibration was written.
 	{
 		int length = 7;
 		byte toRead2[length];
-		Helper::dumpString(30, toRead2, length);
+		Helper::dumpString(32/8*1024-80+30, toRead2, length);
 
-		cal = atoi((char*)toRead2);
-		SerialUSB.print("Cal value is: ");
-		SerialUSB.println(cal);
+		cal = 0-atoi((char*)toRead2);
+		//SerialUSB.print("Cal value is: ");
+		//SerialUSB.println(cal);
 	}
 	return cal;
 }
