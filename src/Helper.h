@@ -23,7 +23,6 @@
 
 #include "Arduino.h"
 #include <extEEPROM.h>    //http://github.com/JChristensen/extEEPROM/tree/dev
-#include <Streaming.h>    //http://arduiniana.org/libraries/streaming/
 #include "Wire.h"
 
 #define RSSI_OFFSET 81

@@ -150,9 +150,9 @@ public:
 
 	int readBytes(byte *array, int packetSize);
 
-	Queue::Queue rxBuffer;
-	Queue::Queue txBuffer;
-	Queue::Queue userBuffer;
+	Queue rxBuffer;
+	Queue txBuffer;
+	Queue userBuffer;
 
 	int dataAvailable();
 	int nextPacket();
