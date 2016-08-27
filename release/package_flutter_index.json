@@ -12,15 +12,15 @@
         {
           "name": "Flutter Basic",
           "architecture": "sam",
-          "version": "0.1.2",
+          "version": "0.1.3",
           "category": "Contributed",
           "help": {
             "online": "http://community.flutterwireless.com/"
           },
-          "url": "http://flutterwireless.com/files/flutter_0.1.2.tar.bz2",
-          "archiveFileName": "flutter_0.1.2.tar.bz2",
-          "checksum": "SHA-256:4708ce4c0cf3ce8702e650cfc060e59d08904d31f598017e09f0a4a3f2f85403",
-          "size": "8613604",
+          "url": "http://flutterwireless.com/files/flutter_0.1.3.tar.bz2",
+          "archiveFileName": "flutter_0.1.3.tar.bz2",
+          "checksum": "SHA-256:f9d0211ebb09d9ae2746341b85367f1a9196aa33b7e7b2cf736c383be3b074fa",
+          "size": "8613405",
           "boards": [
             {"name": "Flutter Basic"}
           ],
