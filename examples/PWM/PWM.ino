@@ -21,7 +21,7 @@ boolean _running = false;
 Flutter flutter;
 
 
-uint32_t pwmPin = 9;
+uint32_t pwmPin = 10;
 uint32_t maxDutyCount = 128;
 uint32_t clkAFreq = 0;
 uint32_t pwmFreq = 10000000ul;
@@ -46,7 +46,7 @@ void setup()
 	PWMC_SetPeriod(PWM_INTERFACE, channel, maxDutyCount);
 	PWMC_EnableChannel(PWM_INTERFACE, channel);
 	PWMC_SetDutyCycle(PWM_INTERFACE, channel, maxDutyCount / 2);
-	pmc_mck_set_prescaler(2);
+	//pmc_mck_set_prescaler(2);
 
 	for (int j = 0; j < 256; j++)
 	{
@@ -63,19 +63,21 @@ void loop()
 
 void playTone(int note, int duration, int delayTime)
 {
+  setup();
+
 	frequency = note;
 	uint32_t startMillis = millis();
 
-	while ((startMillis + duration * 2) > millis())
+	while ((startMillis + duration) > millis())
 	{
 		for (i = 0; i < steps; i++)
 		{
 			PWMC_SetDutyCycle(PWM_INTERFACE, channel, sineTable[i]);
-			delayMicroseconds((1000000ul / (frequency / 2)) / (steps));
+			delayMicroseconds((1000000ul / (frequency)) / (steps));
 		}
 	}
 
-	delay(delayTime * 2 - duration * 2);
+	delay(delayTime  - duration );
 }
 
 void playMario()
@@ -314,6 +316,7 @@ void softInt()
 
 extern boolean tickInterrupt()
 {
+
 	if (!flutter.initialized)
 	{
 		return true;
@@ -321,6 +324,3 @@ extern boolean tickInterrupt()
 
 	return flutter.tickInt();
 }
-
-
-
