@@ -40,8 +40,8 @@ typedef struct
 
 static const registerSettings settings[] =
 {
-	{REG_RFEND_CFG1, (0x3 << 4) | (0x7 << 1)},  //auto RX
-	{REG_RFEND_CFG0, (0x3 << 4)},      //auto RX
+	{REG_RFEND_CFG1, (0x3 << 4) | (0x7 << 1)},  // auto RX after RX
+	{REG_RFEND_CFG0, (0x3 << 4) | (0x1 << 3)},      // auto RX after TX, Radio to IDLE on bad packet.
 	{REG_PKT_CFG0, 0x30},        // PKT_CFG0            Packet Configuration Reg. 0 variable length packet mode
 	{REG_IOCFG0,        0x06},
 	{REG_IOCFG3,        0x30},

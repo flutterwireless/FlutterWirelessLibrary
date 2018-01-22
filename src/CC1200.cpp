@@ -82,6 +82,7 @@ boolean CC1200::sleep(boolean _sleep)
 
 boolean CC1200::init()
 {
+	//Log.notice(F("Initializing radio...\n"));
 	SPI.begin();//Mode 0, user controls CS pin
 	SPI.setClockDivider(20, 12); //5.33 MHz - pushing it closer to 10MHz caused problems, but I didn't check the timing so it may be possible to operate faster than this
 	uint16_t errors = 0;
@@ -98,10 +99,12 @@ boolean CC1200::init()
 	}
 	while (errors != 0);
 
-	//printMARC();
+	////printMARC();
 	//readConfigRegs();
 	//SetFrequency(915);
 	setState(CC1200_RX);
+
+	//Log.notice(F("Init Radio\nState is RX\n"));
 	//rxTestMode();
 	//txTestMode();
 	return true;
@@ -117,6 +120,8 @@ void CC1200::setAddress(byte address)
 //returns true if success, or false if failure. Should not fail.
 boolean CC1200::SetFrequency(uint32_t frequency)
 {
+
+	////Log.notice(F("Set frequency\n"));
 	//digitalWrite(8,HIGH);
 	setState(CC1200_IDLE);
 	SendStrobe(SFRX);
@@ -143,11 +148,13 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 	if (ReadReg(REG_FREQ0) == f0 && ReadReg(REG_FREQ1) == f1 && ReadReg(REG_FREQ2) == f2)
 	{
 		//digitalWrite(8,LOW);
+		////Log.notice(F("Set frequency success.\n"));
 		return true;
 	}
 	else
 	{
 		//digitalWrite(8,LOW);
+		//Log.notice(F("Set frequency failed.\n"));
 		return false;
 	}
 }
@@ -155,6 +162,8 @@ boolean CC1200::SetFrequency(uint32_t frequency)
 
 uint16_t CC1200::registerConfig(void)
 {
+
+	//Log.notice(F("registerConfig\n"));
 	byte writeByte;
 	byte verifyVal;
 	uint16_t errors = 0;
@@ -172,27 +181,31 @@ uint16_t CC1200::registerConfig(void)
 		if (verifyVal != writeByte)
 		{
 			errors++;
+			//Log.notice(F("Error verifying register\n"));
 
-			if (Serial)
+			if (SerialUSB)
 			{
-				Serial.print("Error writing to address 0x");
-				Serial.print(settings[i].addr, HEX);
-				Serial.print(". Value set as 0x");
-				Serial.print(writeByte, HEX);
-				Serial.print(" but read as 0x");
-				Serial.println(verifyVal, HEX);
+				SerialUSB.print("Error writing to address 0x");
+				SerialUSB.print(settings[i].addr, HEX);
+				SerialUSB.print(". Value set as 0x");
+				SerialUSB.print(writeByte, HEX);
+				SerialUSB.print(" but read as 0x");
+				SerialUSB.println(verifyVal, HEX);
 			}
 		}
 	}
 
-	if (Serial)
+	if (SerialUSB)
 	{
-		Serial.print("Wrote ");
-		Serial.print(registerCount - errors);
-		Serial.print(" of ");
-		Serial.print(registerCount);
-		Serial.println(" register values.");
+		SerialUSB.print("Wrote ");
+		SerialUSB.print(registerCount - errors);
+		SerialUSB.print(" of ");
+		SerialUSB.print(registerCount);
+		SerialUSB.println(" register values.");
 	}
+
+
+	//Log.notice(F("registerConfig complete\n"));
 
 	return errors;
 }
@@ -200,7 +213,7 @@ uint16_t CC1200::registerConfig(void)
 
 
 
-#ifdef DEBUG1
+
 
 byte CC1200::printMARC()
 {
@@ -209,28 +222,35 @@ byte CC1200::printMARC()
 	switch (marcState >> 5)
 	{
 		case 0:
-			Serial.println("Marc Settling");
+			SerialUSB.println("Marc Settling");
 			break;
 
 		case 1:
-			Serial.println("Marc TX");
+			SerialUSB.println("Marc TX");
 			break;
 
 		case 2:
-			Serial.println("Marc IDLE");
+			SerialUSB.println("Marc IDLE");
 			break;
 
 		case 3:
-			Serial.println("Marc RX");
+			SerialUSB.println("Marc RX");
 			break;
 	}
 
-	Serial.print("Marc State: 0x");
-	Serial.println(marcState & 0x1F, HEX);
+	SerialUSB.print("Marc State: 0x");
+	SerialUSB.println(marcState & 0x1F, HEX);
+
+	byte marcStatus = ReadReg(REG_MARC_STATUS1);
+	SerialUSB.print("Marc Status: 0x");
+	SerialUSB.println(marcStatus, HEX);
+
+
 	return marcState;
 }
 
 
+#ifdef DEBUG1
 void CC1200::printRadioState(byte state)
 {
 	switch (state)
@@ -289,12 +309,48 @@ void CC1200::reset()
 	SendStrobe(SRES); //is twice necessary? Probably not. Does it cause problems? You tell me...
 }
 
+void CC1200::queueAck(byte address)
+{
+
+	byte txBytesUsed = 0;
+	// Read number of bytes in TX FIFO
+	ccReadReg(REG_NUM_TXBYTES, &txBytesUsed, 1);
+
+	if (txBytesUsed > 0)
+	{
+		// This is some error.
+	}
+
+	if(address==255)
+	{
+		WriteReg(REG_RFEND_CFG1, (0x3 << 4) | (0x7 << 1));  // auto RX after RX
+		return;
+	} else
+	{
+		WriteReg(REG_RFEND_CFG1, (0x2 << 4) | (0x7 << 1));  // auto TX after RX
+	}
+
+	byte *buffer;
+	buffer[0] = ACK_PKT_LENGTH; //packet length byte not included in length calculation
+	buffer[1] = BROADCAST_ADDRESS;
+	buffer[2] = address;
+	buffer[3] = CMD_ACK;
+
+	ccWriteTxFifo(buffer, 4);
+
+}
+
 
 boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 {
 	if (asleep == true)
 	{
 		return false;
+	}
+
+	if(length == 11)
+	{
+		//Log.notice(F("Entered transmit function\n"));
 	}
 
 	//check FIFO and radio state here
@@ -304,17 +360,31 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 
 	if (txBytesUsed > 0)
 	{
+		//Log.notice(F("txBytesUsed > 0. Clearing buffer...\n"));
 		// Make sure that the radio is in IDLE state before flushing the FIFO
 		setState(CC1200_IDLE);
 		SendStrobe(SFTX); //flush buffer if needed
+		//Log.notice(F("Clearing buffer success.\n"));
 	}
-
+	if(length == 11)
+	{
+		//Log.notice(F("Spin FSTX.\n"));
+	}
 	setState(CC1200_FSTX); //spin up frequency synthesizer
 	byte data[length];
+	if(length == 11)
+	{
+		//Log.notice(F("Returned from Spin FSTX.\n"));
+	}
 
 	for (int i = 0; i < length; i++)
 	{
 		data[i] = txBuffer[i + start]; //TODO: alter fifo access functions to allow passing txBuffer directly to read or write from a specific chunk of it
+	}
+
+	if(length == 11)
+	{
+		//Log.notice(F("Ready to write FIFO\n"));
 	}
 
 	ccWriteTxFifo(data, length); //TODO: do error checking for underflow, CCA, etc.
@@ -324,6 +394,7 @@ boolean CC1200::transmit(byte *txBuffer, byte start, byte length)
 	Serial.println(" bytes: ");
 	printBuffer(txBuffer, length);
 #endif
+	//Log.notice(F("TX\n"));
 	setState(CC1200_TX); //spin up frequency synthesizer
 	return true;
 }
@@ -348,6 +419,16 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 		Serial.print(" currentState = ");
 		Serial.println(currentState);
 #endif
+
+		if( setState == CC1200_FSTX)
+		{
+				//Log.notice(F("Got call to CC1200_FSTX\n"));
+				// SerialUSB.print("setState = ");
+				// SerialUSB.print(setState);
+				// SerialUSB.print(" currentState = ");
+				// SerialUSB.println(currentState);
+				//printMARC();
+		}
 
 		switch (currentState)
 		{
@@ -382,11 +463,23 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_FSTX:
+						//printMARC();
+						//Log.notice(F("Set SFSTXON from CC1200_RX\n"));
+						//SendStrobe(SIDLE);
 						SendStrobe(SFSTXON);
+						//Log.notice(F("Set SFSTXON from CC1200_RX\n"));
+						//printMARC();
 						break;
 				}
 
+				// SerialUSB.print(" currentState = ");
+				// SerialUSB.println(currentState);
 				currentState = getState();
+				// if( setState == CC1200_FSTX)
+				// {
+				// 	SerialUSB.print(" currentState = ");
+				// 	SerialUSB.println(currentState);
+				// }
 				break;
 
 			case CC1200_TX:
@@ -401,6 +494,7 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 						break;
 
 					case CC1200_FSTX:
+						SendStrobe(SIDLE);
 						SendStrobe(SFSTXON);
 						break;
 				}
@@ -449,10 +543,10 @@ CC1200_STATE CC1200::setState(CC1200_STATE setState)
 		}
 	}
 
-#ifdef DEBUG_STATES
-	Serial.print("State is now ");
-	Serial.println(currentState);
-#endif
+// #ifdef DEBUG_STATES
+// 	SerialUSB.print("State is now ");
+// 	SerialUSB.println(currentState);
+// #endif
 	return (CC1200_STATE)currentState;
 }
 

@@ -22,12 +22,13 @@
 
 
 Radio radio;
-byte pinState = LOW;
 volatile bool hopNow = false;
 volatile bool updateSysTick = false;
 static const uint32_t bands[] = FREQ_BANDS;
 static const uint32_t numChannels[] = NUM_CHANNELS;
 volatile int syncError = 0;
+
+volatile bool queueAck = false;
 
 volatile int pin = 6;
 
@@ -60,6 +61,8 @@ Network::Network()
 	paused = false;
 	frequency_adjustment = 0;
 	frequency_calibration = 0;
+	awaiting_ack = false;
+	received_ack = false;
 }
 
 //configuration functions
@@ -88,21 +91,29 @@ void Network::enterTestMode()
 
 //initialization
 
-boolean Network::init(uint8_t _band, int32_t calibration) //intialize radio.
+boolean Network::init(uint8_t _band, int32_t calibration, Logging _logger) //intialize radio.
 {
 	band = _band;
+
+	logger = _logger;
 
 	frequency_calibration = calibration;
 
 	if (!radio.enabled)
 	{
-		radio.enabled = radio.init();
+		radio.enabled = radio.init(logger);
 	}
 
 	radioState = RXIDLE;
 #ifdef PIN_DEBUG
 	pinMode(6, OUTPUT);
 	pinMode(7, OUTPUT);
+	pinMode(8, OUTPUT);
+	pinMode(9, OUTPUT);
+	pinDebug(6, LOW);
+	pinDebug(7, LOW);
+	pinDebug(8, LOW);
+	pinDebug(9, LOW);
 #endif
 	return radio.enabled;
 }
@@ -152,7 +163,8 @@ void Network::generateChannelList(String name)
 
 void Network::generateChannelList(uint16_t seed)
 {
-	int i, temp = 0;
+	int i = 0;
+	int temp = 0;
 	randomSeed(seed); //initialize Arduino pseudorandom number generator with our seed.
 
 	while (i < 51)
@@ -198,22 +210,22 @@ uint16_t Network::generateSeed(String name)
 
 void Network::printChannelList()
 {
-	if (!Serial)
+	while (!SerialUSB)
 	{
-		Serial.begin(115200);
+		//SerialUSB.begin(115200);
 	}
 
-	Serial.print("Network Name: ");
-	Serial.print(networkName);
-	Serial.print(", Seed: ");
-	Serial.println(networkSeed);
+	//SerialUSB.print("Network Name: ");
+	//SerialUSB.print(networkName);
+	//SerialUSB.print(", Seed: ");
+	//SerialUSB.println(networkSeed);
 
 	for (int i = 0; i < 50; i++)
 	{
-		//Serial.print("Ch Index ");
-		Serial.print(i);
-		Serial.print(", ");
-		Serial.println(channelList[i]);
+		////SerialUSB.print("Ch Index ");
+		//SerialUSB.print(i);
+		//SerialUSB.print(", ");
+		//SerialUSB.println(channelList[i]);
 	}
 }
 
@@ -228,8 +240,6 @@ boolean Network::setChannel(uint32_t _channel)
 		return false;
 	}
 
-	//if (channelIndex == TIMING_CH_INDEX && address != MASTER_ADDRESS && radioState != RXACTIVE)
-//	{
 	channel = _channel;
 	return radio.setFrequency(bands[band] + (CHANNEL_SPACE / 2) + (int32_t)_channel * CHANNEL_SPACE + frequency_adjustment + frequency_calibration);
 
@@ -244,17 +254,20 @@ boolean Network::setChannelByIndex(uint32_t _channel_index)
 
 void Network::printTime()
 {
-	Serial.print("Time: ");
-	Serial.print(time.seconds);
-	Serial.print("s, ");
-	Serial.print(time.millis);
-	Serial.println("ms.");
+	////SerialUSB.print("Time: ");
+	////SerialUSB.print(time.seconds);
+	////SerialUSB.print("s, ");
+	////SerialUSB.print(time.millis);
+	////SerialUSB.println("ms.");
 }
 
 
 boolean Network::softInt() //software interrupt
 {
 	interrupts();
+
+
+	////SerialUSB.println("SoftInt");
 
 	if (time.millis == 0)
 	{
@@ -275,22 +288,39 @@ boolean Network::softInt() //software interrupt
 		}
 	}
 
+	if(queueAck == true)
+	{
+		queueAck = false;
+		if ((channelIndex == TIMING_CH_INDEX && time.millis % HOPTIME == TXTIME1) || networkStatus != NORMAL_OPERATION)
+		{
+			radio.queueAck(255); //disables ack
+			radioState = RXIDLE;
+			////SerialUSB.println("NOAck");
+		} else
+		{
+			radio.queueAck(address); //enables ack
+			////SerialUSB.println("QueueAck");
+		}
+	}
+
+
 	if (rxPending == true)
 	{
 		rxPending = false;
 #ifdef DEBUG
-		Serial.println("Read RX");
+		////SerialUSB.println("Read RX");
 #endif
 		int packetLength = readPacket();
 
 		if (packetLength > 0)
 		{
-#ifdef DEBUG
-			Serial.print("Read ");
-			Serial.print(packetLength);
-			Serial.print(" bytes from radio.");
-#endif
+//#ifdef DEBUG
+			////SerialUSB.print("Read ");
+			////SerialUSB.print(packetLength);
+			////SerialUSB.print(" bytes from radio.");
+//#endif
 			processRXPacket(packetLength);
+			////SerialUSB.println("ReadRX");
 		}
 		else if (packetLength < 0)
 		{
@@ -299,9 +329,18 @@ boolean Network::softInt() //software interrupt
 		}
 	}
 
+	if(received_ack == true)
+	{
+		Log.notice(F("Got ACK\n"));
+		awaiting_ack = false;
+		received_ack = false;
+	}
+
 	switch (networkStatus)
 	{
 		case DISABLED:
+
+		////SerialUSB.println("Network Disabled");
 			return true;
 			break;
 
@@ -318,10 +357,12 @@ boolean Network::softInt() //software interrupt
 
 		case SYNC_WAIT:
 			processNormalOperation();
+			////SerialUSB.println("Network SYNC_WAIT");
 			break;
 
 		case NORMAL_OPERATION:
 			processNormalOperation();
+			////SerialUSB.println("Network NORMAL_OPERATION");
 			break;
 
 		case TEST_MODE:
@@ -338,13 +379,17 @@ void Network::txNext()
 	{
 		if (commandQueueTX[0][0] == QUEUE_TX)
 		{
+			awaiting_ack = true;
+			received_ack = false;
 			transmitPacket(0);
+			Log.notice(F("Transmit Queued TX packet\n"));
 		}
 	}
 }
 
 void Network::transmitPacket(int index)
 {
+	radio.queueAck(255); //disables Ack on RX so we do not Ack the Ack.
 	radio.transmit(txBuffer.array, commandQueueTX[index][1], commandQueueTX[index][2]);
 	radioState = TXPENDING;
 	dequeueTXBytes(index);
@@ -397,11 +442,18 @@ void Network::dequeueRXPacket(int index)
 
 void Network::processNormalOperation()
 {
-// Serial.println("blip");
+// //SerialUSB.println("blip");
+// SerialUSB.print("networkStatus: ");
+// SerialUSB.println(networkStatus);
+// SerialUSB.print("radioState: ");
+// SerialUSB.println(radioState);
+
 	if (hopNow == true && networkStatus!=TEST_MODE)
 	{
 		hopNow = false;
+		//SerialUSB.println("Hop");
 		hop();
+		//Log.notice(F("Hopped\n"));
 	}
 
 	if(address == MASTER_ADDRESS && networkStatus==TEST_MODE)
@@ -430,15 +482,20 @@ void Network::processNormalOperation()
 
 		if (channelIndex == TIMING_CH_INDEX && address == MASTER_ADDRESS && time.millis % HOPTIME == TXTIME1)
 		{
+			//Log.notice(F("Transmit Sync\n"));
 			transmitSyncPacket(0x00);
+			//Log.notice(F("Transmit Sync Success\n"));
 		}
 
 		if (channelIndex != TIMING_CH_INDEX || time.millis % HOPTIME == TXTIME2) // && time.micros%HOPTIME <=45000)
 		{
-			// Serial.println("Processing Queue");
+			// ////SerialUSB.println("Processing Queue");
 			// processQueue();
+			//Log.notice(F("Transmit Next\n"));
+			awaiting_ack = false;
 			txNext();
 		}
+
 	}
 
 #ifdef DEBUG1
@@ -456,13 +513,13 @@ int Network::readPacket()
 {
 	byte count = radio.bytesAvailable();
 #ifdef DEBUG
-	Serial.println("");
-	Serial.println("----------------");
-	Serial.println("");
+	////SerialUSB.println("");
+	////SerialUSB.println("----------------");
+	////SerialUSB.println("");
 #endif
 
-//  Serial.print("Count: ");
-//  Serial.print(count);
+//  ////SerialUSB.print("Count: ");
+//  ////SerialUSB.print(count);
 
 	if (count > 0)
 	{
@@ -489,19 +546,21 @@ byte Network::processRXPacket(byte packetLength)
 {
 	int commandByteIndex = rxBuffer.bytesEnd() - packetLength + 3;
 	int command = rxBuffer.array[commandByteIndex];
-#ifdef DEBUG
-	Serial.print("Command Byte. 0x");
-	Serial.println(command, HEX);
-#endif
+//#ifdef DEBUG
+	////SerialUSB.print("Command Byte. 0x");
+	////SerialUSB.println(command, HEX);
+//#endif
 
 	switch (command)
 	{
 		case CMD_SYNCTIME:
 			syncTime(packetLength);
+			////SerialUSB.println("SyncTime");
 			break;
 
 		case CMD_USER_ARRAY:
 			queueRXPacket(packetLength);
+			////SerialUSB.println("CMD_USER_ARRAY");
 			break;
 	}
 
@@ -523,10 +582,10 @@ byte Network::queueRXPacket(byte packetLength)
 	packetQueueRX[queuedRXPackets][1] = userBuffer.bytesEnd() - packetLength;
 	packetQueueRX[queuedRXPackets][2] = packetLength;
 #ifdef DEBUG
-	Serial.print("Received Packet, Index #");
-	Serial.print(queuedRXPackets);
-	Serial.print(", RX Buffer bytes: ");
-	Serial.println(rxBuffer.bytesEnd());
+	////SerialUSB.print("Received Packet, Index #");
+	////SerialUSB.print(queuedRXPackets);
+	////SerialUSB.print(", RX Buffer bytes: ");
+	////SerialUSB.println(rxBuffer.bytesEnd());
 #endif
 	queuedRXPackets++;
 
@@ -604,57 +663,57 @@ void Network::syncTime(byte packetLength)
 	time.micros = 1000 - newMicros;
 	time.millis = newMillis;
 	time.seconds = newSeconds;
-#ifdef DEBUG_TIME
-	Serial.print("Local time when recieved: ");
-	Serial.print((lastPacketTime.micros));
-	Serial.print(" uS, ");
-	Serial.print((lastPacketTime.millis));
-	Serial.print(" mS, ");
-	Serial.print((lastPacketTime.seconds));
-	Serial.println(" S.");
-	Serial.print("Time recieved over the air: ");
-	Serial.print((sentMicros));
-	Serial.print(" uS, ");
-	Serial.print((sentMillis));
-	Serial.print(" mS, ");
-	Serial.print((sentSeconds));
-	Serial.println(" S.");
-	Serial.print("Time elapsed: ");
-	Serial.print((microsElapsed));
-	Serial.print(" uS, ");
-	Serial.print((millisElapsed));
-	Serial.print(" mS, ");
-	Serial.print((secondsElapsed));
-	Serial.println(" S.");
-	Serial.print("Time now: ");
-	Serial.print((microsNow));
-	Serial.print(" uS, ");
-	Serial.print((millisNow));
-	Serial.println(" mS, ");
-	Serial.print("Setting to: ");
-	Serial.print((newMicros));
-	Serial.print(" uS, ");
-	Serial.print((newMillis));
-	Serial.println(" mS, ");
-	Serial.println("");
-#endif
-// Serial.print("Time Error: ");
-// Serial.println((error)/1000);
-	//Serial.print("Read Packet Lag: ");
-	//Serial.println((microsSinceReception)/1000);
-	//Serial.print("Packet Index: ");
-	//Serial.println(index);
-//  Serial.println();
-	//Serial.print("RX Error: ");
-// Serial.println((temp.micros-microsRecieved/1000)/1000.0f);
+//#ifdef DEBUG_TIME
+	////SerialUSB.print("Local time when recieved: ");
+	////SerialUSB.print((lastPacketTime.micros));
+	////SerialUSB.print(" uS, ");
+	////SerialUSB.print((lastPacketTime.millis));
+	////SerialUSB.print(" mS, ");
+	////SerialUSB.print((lastPacketTime.seconds));
+	////SerialUSB.println(" S.");
+	////SerialUSB.print("Time recieved over the air: ");
+	////SerialUSB.print((sentMicros));
+	////SerialUSB.print(" uS, ");
+	////SerialUSB.print((sentMillis));
+	////SerialUSB.print(" mS, ");
+	////SerialUSB.print((sentSeconds));
+	////SerialUSB.println(" S.");
+	////SerialUSB.print("Time elapsed: ");
+	////SerialUSB.print((microsElapsed));
+	////SerialUSB.print(" uS, ");
+	////SerialUSB.print((millisElapsed));
+	////SerialUSB.print(" mS, ");
+	////SerialUSB.print((secondsElapsed));
+	////SerialUSB.println(" S.");
+	////SerialUSB.print("Time now: ");
+	////SerialUSB.print((microsNow));
+	////SerialUSB.print(" uS, ");
+	////SerialUSB.print((millisNow));
+	////SerialUSB.println(" mS, ");
+	////SerialUSB.print("Setting to: ");
+	////SerialUSB.print((newMicros));
+	////SerialUSB.print(" uS, ");
+	////SerialUSB.print((newMillis));
+	////SerialUSB.println(" mS, ");
+	////SerialUSB.println("");
+//#endif
+// ////SerialUSB.print("Time Error: ");
+// ////SerialUSB.println((error)/1000);
+	//////SerialUSB.print("Read Packet Lag: ");
+	//////SerialUSB.println((microsSinceReception)/1000);
+	//////SerialUSB.print("Packet Index: ");
+	//////SerialUSB.println(index);
+//  ////SerialUSB.println();
+	//////SerialUSB.print("RX Error: ");
+// ////SerialUSB.println((temp.micros-microsRecieved/1000)/1000.0f);
 //channel = 0;
 #ifdef DEBUG
-	Serial.print("Time: ");
-	Serial.print(time.seconds + (time.millis) / 1000.0f);
-	Serial.println(" seconds.");
+	////SerialUSB.print("Time: ");
+	////SerialUSB.print(time.seconds + (time.millis) / 1000.0f);
+	////SerialUSB.println(" seconds.");
 #endif
-// Serial.print(time.micros/1000);
-// Serial.println("ms.");
+// ////SerialUSB.print(time.micros/1000);
+// ////SerialUSB.println("ms.");
 }
 
 
@@ -696,6 +755,8 @@ boolean Network::hop()
 	//channel = (time.micros*200)/1000000;
 	if (channelIndex == TIMING_CH_INDEX && networkStatus != NORMAL_OPERATION && address != MASTER_ADDRESS)
 	{
+		//SerialUSB.print("Don't Hop. Channel is: ");
+		//SerialUSB.println(channelIndex);
 		return false; //don't hop if sync not recieved
 	}
 
@@ -717,21 +778,24 @@ boolean Network::hop()
 		if(syncError>=2)
 		{
 			networkStatus = SYNC_WAIT;
+			radioState = RXIDLE;
 		  channelIndex = TIMING_CH_INDEX;
 		}
 	}
 
-#ifdef DEBUG1
-	Serial.print("Setting radio to channel ");
-	Serial.println(channelIndex);
-#endif
+//#ifdef DEBUG1
+	//SerialUSB.print("Setting radio to channel ");
+	//SerialUSB.println(channelIndex);
+//#endif
 
 	if (paused == true && channelIndex != TIMING_CH_INDEX)
 	{
 		return false;
 	}
 
+	//Log.notice(F("Set channel\n"));
 	setChannelByIndex(channelIndex);
+	radioState = RXIDLE;
 	pinDebug(7, LOW);
 	return true;
 }
@@ -818,6 +882,11 @@ boolean Network::tickInterrupt()
 
 	}
 
+	if(received_ack == true)
+	{
+		softInterrupt();
+	}
+
 	pinDebug(6, LOW);
 	return true; //system will update its own millisecond timer if this is true.
 }
@@ -841,19 +910,28 @@ void Network::pinDebug(int pin, int value)
 int Network::radioInterrupt()
 {
 	interrupts();
-	pinState = digitalRead(GDO0_PIN);
 
-	if (pinState == HIGH)
+	if (digitalRead(GDO0_PIN) == HIGH)
 	{
 		// lastPacketTime.micros=time.micros;
 		// lastPacketTime.seconds=time.seconds;
-		//Serial.print(" HIGH ");
+		//////SerialUSB.print(" HIGH ");
 		switch (radioState)
 		{
 			case RXIDLE:
 				radioState = RXACTIVE;
 				updateLastPacketTime();
-				//pinDebug(9,HIGH);
+				pinDebug(9, HIGH);
+				queueAck = true;
+				break;
+
+			case ACK_TX:
+				radioState = ACK_ACTIVE;
+				pinDebug(9, HIGH);
+				break;
+
+			case ACK_WAIT:
+				radioState = ACK_ACTIVE;
 				break;
 
 			case TXPENDING:
@@ -874,18 +952,25 @@ int Network::radioInterrupt()
 	}
 	else
 	{
-		//Serial.print(" LOW ");
+		//////SerialUSB.print(" LOW ");
 		switch (radioState)
 		{
 			case RXACTIVE:
-				radioState = RXIDLE;
+				radioState = ACK_TX;
 				rxPending = true;
-				// pinDebug(9, HIGH);
+				pinDebug(9, LOW);
 				softInterrupt();
 				break;
 
 			case TXACTIVE:
+				radioState = ACK_WAIT;
+				pinDebug(9, LOW);
+				break;
+
+			case ACK_ACTIVE:
 				radioState = RXIDLE;
+				received_ack = true;
+				pinDebug(9, LOW);
 				break;
 
 			default:
@@ -896,8 +981,20 @@ int Network::radioInterrupt()
 		}
 	}
 
-// Serial.println(radioState);
+// ////SerialUSB.println(radioState);
 	return 0;
+}
+
+void Network::setLED(int red, int green, int blue)
+{
+	analogWrite(LED_R, (byte)(255 - red));
+#ifdef FLUTTER_R2
+	analogWrite(LED_G, (byte)(255 - green));
+	analogWrite(LED_B, (byte)(blue));
+#else
+	analogWrite(LED_G, (byte)(green));
+	analogWrite(LED_B, (byte)(255 - blue));
+#endif
 }
 
 void Network::updateLastPacketTime() //sends packet with just data (no commands added)
@@ -920,9 +1017,11 @@ void Network::transmitSyncPacket(byte destaddress) //sends packet with just data
 	uint32_t _micros = micros() % 1000;
 	uint32_t _millis = time.millis;
 	uint32_t _seconds = time.seconds;
+	Log.notice(F("Transmit Sync start\n"));
 	byte txData[11] = {10, BROADCAST_ADDRESS, address, CMD_SYNCTIME, 0, (byte)((_micros) / 4), (byte)(((_millis) >> 2) & 0xFF) , (byte)((_millis << 6) & 0xC0) | (_seconds >> 24 & 0x3F) , (byte)(_seconds >> 16 & 0xFF) , (byte)(_seconds >> 8 & 0xFF) , (byte)(_seconds & 0xFF)};
 	radio.transmit(txData, 11);
 	radioState = TXPENDING;
+	Log.notice(F("Transmit Sync Success\n"));
 }
 
 int Network::queueDataPacket(byte command, byte *tx, byte length, byte destaddress) //sends packet with just data (no commands added)
@@ -933,7 +1032,7 @@ int Network::queueDataPacket(byte command, byte *tx, byte length, byte destaddre
 	txBuffer.write(destaddress);
 	txBuffer.write(address);
 	txBuffer.write(command);
-	txBuffer.write(0); //an extra byte, currentl not in use.
+	txBuffer.write(0); //an extra byte, currently not in use.
 	byte i;
 
 	for (i = 5; i < length; i++)
@@ -955,19 +1054,19 @@ void Network::queueCommand(byte cmd, byte start, byte length)
 			commandQueueTX[queuedTXCommands][2] = length;
 			queuedTXCommands++;
 #ifdef DEBUG
-			Serial.print("Queuing Command ");
-			Serial.print(queuedTXCommands, DEC);
-			Serial.print(" = ");
-			Serial.print(cmd, DEC);
-			Serial.print(" ");
-			Serial.print(start, DEC);
-			Serial.print(" ");
-			Serial.println(length, DEC);
+			////SerialUSB.print("Queuing Command ");
+			////SerialUSB.print(queuedTXCommands, DEC);
+			////SerialUSB.print(" = ");
+			////SerialUSB.print(cmd, DEC);
+			////SerialUSB.print(" ");
+			////SerialUSB.print(start, DEC);
+			////SerialUSB.print(" ");
+			////SerialUSB.println(length, DEC);
 #endif
 		}
 		else
 		{
-			// Serial.print("ERR: Cannot Queue Command, queue full.");
+			SerialUSB.print("ERR: Cannot Queue Command, queue full.");
 		}
 	}
 }

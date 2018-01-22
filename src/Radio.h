@@ -32,7 +32,7 @@ class Radio
 {
 public:
 	Radio();
-	boolean init();
+	boolean init(Logging _logger);
 
 	boolean enabled;
 	boolean awake;
@@ -48,6 +48,7 @@ public:
 	boolean enable();
 	boolean transmit(byte *data, byte start, byte length);
 	boolean transmit(byte *data, byte length);
+	void queueAck(byte address);
 	void clearRXFIFO();
 	int32_t getRSSI();
 

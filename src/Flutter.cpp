@@ -36,10 +36,10 @@ Flutter::Flutter()
 	setInterrupts();
 }
 
-boolean Flutter::init()
+boolean Flutter::init(Logging logger)
 {
 	int32_t cal = readCalibration();
-	initialized = network.init(band, (int32_t)cal);
+	initialized = network.init(band, (int32_t)cal, logger);
 	return initialized;
 }
 

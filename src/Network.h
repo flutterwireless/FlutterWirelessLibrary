@@ -109,7 +109,7 @@ class Network
 {
 public:
 	Network();
-	boolean init(uint8_t _band, int32_t calibration);
+	boolean init(uint8_t _band, int32_t calibration, Logging _logger);
 	volatile byte address;
 	volatile byte band;
 	uint16_t channelIndex;
@@ -162,8 +162,10 @@ public:
 
 private:
 
+	boolean awaiting_ack;
+	volatile boolean received_ack;
 
-
+	Logging logger;
 
 	void pinDebug(int pin, int value);
 
@@ -209,6 +211,8 @@ private:
 
 	void txNext();
 	void transmitPacket(int index);
+
+	void setLED(int red, int green, int blue);
 };
 
 

@@ -20,7 +20,7 @@
 
 #ifndef Flutter_h
 #define Flutter_h
-
+#include <ArduinoLog.h>
 #include "Arduino.h"
 #include "Network.h"
 #include "Reset.h"
@@ -28,11 +28,14 @@
 #include "Helper.h"
 //#include "SPI.h"
 
-
-//System definitions
-#define MASTER_ADDRESS 1
-
 //Radio Configuration
+
+// Network Values
+#define MASTER_ADDRESS 1
+#define BROADCAST_ADDRESS 0
+
+#define CMD_USER_ARRAY 0x20
+#define CMD_ACK 0x3F
 
 //radio states
 typedef enum _RADIO_STATE_
@@ -55,6 +58,9 @@ typedef enum _RADIO_STATE_
 #define TXACTIVE (byte)4
 #define TXFAILED (byte)5
 #define TXSUCCEEDED (byte)6
+#define ACK_TX (byte)7
+#define ACK_WAIT (byte)8
+#define ACK_ACTIVE (byte)9
 
 
 //board configuration
@@ -79,7 +85,7 @@ typedef enum _RADIO_STATE_
 //#define DEBUG
 //#define DEBUG_TIME
 //#define RADIOTESTMODE
-//#define PIN_DEBUG
+#define PIN_DEBUG
 
 
 class Flutter
@@ -92,7 +98,7 @@ public:
 	boolean synchronized;
 	byte band;
 
-	boolean init();
+	boolean init(Logging logger);
 	void setLED(int red, int green, int blue);
 	byte sendData(byte data, byte address);
 	byte sendData(byte data[], byte length, byte address);

@@ -30,7 +30,7 @@ Radio::Radio()
 	awake = false;
 }
 
-boolean Radio::init()
+boolean Radio::init(Logging _logger)
 {
 	return ccradio.init();
 }
@@ -74,6 +74,11 @@ boolean Radio::txBytes(byte _bytes)
 void Radio::setAddress(byte address)
 {
 	ccradio.setAddress(address);
+}
+
+void Radio::queueAck(byte address)
+{
+	ccradio.queueAck(address);
 }
 
 void Radio::clearRXFIFO()

@@ -54,6 +54,7 @@ CC1200_STATE;
 #define RADIO_RXERROR (byte)6
 #define RADIO_TXERROR (byte)7
 
+#define ACK_PKT_LENGTH 3
 
 #define REG_TXFIFO 0x3F
 
@@ -92,6 +93,7 @@ public:
 	byte getState();
 	void flushRX();
 	void flushTX();
+  	void queueAck(byte address);
 	void reset();
 	void enterSleep();
 	void exitSleep();
@@ -115,6 +117,7 @@ public:
 
 private:
 
+  Logging logger;
 
 	CC1200_STATE setState(CC1200_STATE setState);
 
